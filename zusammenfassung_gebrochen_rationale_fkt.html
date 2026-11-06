@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prüfungs-Check: Gebrochen-rationale Funktionen</title>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#eef2f3;--paperline:rgba(29,63,187,.06);--surface:#ffffff;--surface2:#f4f6fa;--ink:#15203b;--muted:#56607a;
+  --line:#c3ccd8;--grid:#e1e7ef;--axis:#15203b;--plotbg:#ffffff;
+  --curve:#1d3fbb;--onprimary:#ffffff;--selbg:#e6ecff;--selring:rgba(29,63,187,.22);
+  --accent:#c2185b;--zero:#00838f;
+  --ok:#1b7f4b;--okbg:#e3f3ea;--bad:#c62828;--badbg:#fdeaea;--warn:#8a6100;--warnbg:#fbf1d3;
+  --above:#1b7f4b;--below:#d9480f;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0f1524;--paperline:rgba(140,170,255,.06);--surface:#182036;--surface2:#1d2742;--ink:#e7ecf8;--muted:#a3aec9;
+    --line:#3a4562;--grid:#273250;--axis:#c9d3ea;--plotbg:#121a2d;
+    --curve:#8fb0ff;--onprimary:#0a1226;--selbg:#22305a;--selring:rgba(143,176,255,.3);
+    --accent:#ff86b8;--zero:#4dd0e1;
+    --ok:#4cc38a;--okbg:#143324;--bad:#ff8a80;--badbg:#3a1e21;--warn:#f2c14e;--warnbg:#38301a;
+    --above:#4cc38a;--below:#ff9b5c;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0f1524;--paperline:rgba(140,170,255,.06);--surface:#182036;--surface2:#1d2742;--ink:#e7ecf8;--muted:#a3aec9;
+  --line:#3a4562;--grid:#273250;--axis:#c9d3ea;--plotbg:#121a2d;
+  --curve:#8fb0ff;--onprimary:#0a1226;--selbg:#22305a;--selring:rgba(143,176,255,.3);
+  --accent:#ff86b8;--zero:#4dd0e1;
+  --ok:#4cc38a;--okbg:#143324;--bad:#ff8a80;--badbg:#3a1e21;--warn:#f2c14e;--warnbg:#38301a;
+  --above:#4cc38a;--below:#ff9b5c;
+}
+*,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+[hidden]{display:none!important}
+body{
+  margin:0;color:var(--ink);background-color:var(--bg);
+  background-image:linear-gradient(var(--paperline) 1px,transparent 1px),linear-gradient(90deg,var(--paperline) 1px,transparent 1px);
+  background-size:24px 24px;
+  font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+i{font-family:Cambria,"Cambria Math","STIX Two Text",Georgia,serif}
+sub,sup{line-height:0}
+sup{font-size:.7em}
+a{color:var(--curve)}
+.wrap{max-width:940px;margin:0 auto;padding:0 16px}
+
+/* Kopf und Navigation */
+header.top{padding:calc(env(safe-area-inset-top,0px) + 22px) 0 8px}
+h1{font:700 clamp(1.5rem,4.2vw,2.2rem)/1.15 Cambria,"Iowan Old Style",Georgia,serif;margin:0 0 4px}
+.sub{margin:0;color:var(--muted)}
+.nav{position:-webkit-sticky;position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.navin{max-width:940px;margin:0 auto;display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:8px 16px;scrollbar-width:none}
+.navin::-webkit-scrollbar{display:none}
+.navin a{flex:none;text-decoration:none;color:var(--ink);font-weight:600;font-size:.86rem;padding:6px 11px;border:1.5px solid var(--line);border-radius:99px;background:var(--surface)}
+.navin a:hover{border-color:var(--curve)}
+
+/* Abschnitte */
+.sec{background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:18px 16px 20px;margin:18px 0;scroll-margin-top:62px}
+.sech{display:flex;align-items:center;gap:10px;margin:0 0 4px}
+.sech .n{flex:none;width:32px;height:32px;border-radius:6px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:700}
+.sech h2{font:700 1.3rem/1.2 Cambria,"Iowan Old Style",Georgia,serif;margin:0}
+.lead{color:var(--muted);margin:2px 0 12px}
+.merke{border-left:4px solid var(--curve);background:var(--surface2);padding:10px 14px;border-radius:0 6px 6px 0;margin:10px 0}
+.merke h3{font-size:.95rem;margin:0 0 4px;color:var(--curve)}
+.merke.trap{border-left-color:var(--accent)}
+.merke.trap h3{color:var(--accent)}
+.merke ol,.merke ul{margin:.2em 0;padding-left:1.25em}
+.merke li{margin:3px 0}
+.merke p{margin:.3em 0}
+.cols{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.merke{overflow-wrap:break-word}
+.cols>.merke{margin:0}
+@media (min-width:720px){.cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.uebung{margin-top:16px;border-top:1.5px dashed var(--line);padding-top:12px}
+.uebung>h3{font-size:1.02rem;margin:0 0 4px}
+.uebung>h3::before{content:"\270E\00a0";color:var(--curve)}
+.uebung>p.task{margin:0 0 8px;color:var(--muted);font-size:.93rem}
+.tool{display:inline-block;font-size:.76rem;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--selbg);color:var(--curve);margin:2px 4px 2px 0;white-space:nowrap}
+
+/* Fahrplan */
+.road{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+@media (min-width:720px){.road{grid-template-columns:1fr 1fr}}
+.road li{display:flex;gap:10px;align-items:flex-start;background:var(--surface2);border:1px solid var(--grid);border-radius:6px;padding:10px 12px}
+.rn{flex:none;width:26px;height:26px;border-radius:50%;background:var(--curve);color:var(--onprimary);display:grid;place-items:center;font-size:.85rem;font-weight:700;margin-top:1px}
+.road h3{margin:0 0 2px;font-size:.98rem}
+.road p{margin:2px 0;font-size:.9rem}
+.road a{font-size:.85rem;font-weight:600}
+
+/* Bedienelemente */
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.btn,.opt,.pk,.seg button{-webkit-appearance:none;appearance:none;font:inherit;cursor:pointer;touch-action:manipulation}
+.btn{font-weight:600;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 14px;border-radius:6px;min-height:42px}
+.btn:hover{border-color:var(--curve)}
+.btn.primary{background:var(--curve);border-color:var(--curve);color:var(--onprimary)}
+.pick{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}
+.pk{font-size:.86rem;font-weight:600;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 11px;border-radius:99px;min-height:36px}
+.pk.on{background:var(--curve);border-color:var(--curve);color:var(--onprimary)}
+.opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.opt{font-size:.9rem;font-weight:600;padding:8px 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);min-height:42px;text-align:left}
+.opt:hover{border-color:var(--curve)}
+.opt.right{border-color:var(--ok);background:var(--okbg)}
+.opt.wrong{border-color:var(--bad);background:var(--badbg)}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:6px;overflow:hidden;vertical-align:middle}
+.seg button{border:0;border-left:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;padding:8px 13px;min-height:40px}
+.seg button:first-child{border-left:0}
+.seg button.on{background:var(--curve);color:var(--onprimary)}
+.ctl{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:6px 0}
+.ctl>span{font-weight:600;font-size:.92rem}
+:focus-visible{outline:3px solid var(--curve);outline-offset:2px}
+
+/* Terme */
+.termbox{font-size:1.12rem;padding:10px 12px;background:var(--surface2);border-radius:6px;overflow-x:auto;margin:6px 0 8px}
+.tf{font-family:Cambria,"Cambria Math","STIX Two Text",Georgia,serif;white-space:nowrap}
+.fr{display:inline-flex;flex-direction:column;align-items:stretch;vertical-align:middle;margin:0 .12em;line-height:1.3}
+.fr>span{white-space:nowrap;text-align:center}
+.fr>span:first-child{border-bottom:1.5px solid currentColor;padding:0 .35em .06em}
+.fr>span:last-child{padding:.06em .35em 0}
+.m{font-family:Cambria,"Cambria Math","STIX Two Text",Georgia,serif}
+
+/* Eingaben */
+.fld{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin:8px 0}
+.fld label{min-width:0}
+.fld label{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-weight:600;font-size:.95rem}
+.fld label>span.l{flex:0 0 auto;min-width:10.5em}
+input[type=text],select{font:inherit;font-size:16px;padding:8px 10px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);min-width:0}
+input[type=text]{flex:1 1 150px;-webkit-appearance:none;appearance:none}
+select{flex:1 1 200px;max-width:100%}
+input[type=text].ok,select.ok{border-color:var(--ok);background:var(--okbg)}
+input[type=text].no,select.no{border-color:var(--bad);background:var(--badbg)}
+.hint{font-size:.82rem;color:var(--muted);margin:0}
+
+/* Rückmeldung */
+.fb{border-radius:6px;padding:8px 10px;margin:6px 0;font-size:.92rem}
+.fb.good{background:var(--okbg)}
+.fb.good::before{content:"\2714\00a0";color:var(--ok);font-weight:700}
+.fb.bad{background:var(--badbg)}
+.fb.bad::before{content:"\2718\00a0";color:var(--bad);font-weight:700}
+.fb.info{background:var(--warnbg)}
+.way{background:var(--surface2);border-radius:6px;padding:8px 12px;margin:6px 0;font-size:.92rem}
+.way p{margin:.35em 0}
+.score{font-weight:700}
+
+/* Graph */
+.plot{max-width:520px;margin:10px auto 4px}
+.ph-plot{min-height:0;aspect-ratio:6/5}
+@supports not (aspect-ratio:1){.ph-plot{min-height:260px}}
+.dset{font-family:Cambria,"Cambria Math","STIX Two Text",Georgia,serif;font-weight:400;font-size:1.08rem;white-space:nowrap}
+.dwrap{display:flex;align-items:center;gap:6px;flex:1 1 220px;min-width:0}
+.dwrap input{flex:1 1 100px}
+.plot>svg{width:100%;height:auto;display:block;background:var(--plotbg);border:1px solid var(--grid);border-radius:4px}
+.legend svg{flex:none;display:inline-block;overflow:visible}
+.ph{display:flex;align-items:center;justify-content:center;min-height:200px;border:1.5px dashed var(--line);border-radius:6px;color:var(--muted);font-size:.9rem;padding:16px;text-align:center}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;justify-content:center;font-size:.8rem;color:var(--muted);margin:4px 0 0}
+.legend span{display:inline-flex;align-items:center;gap:4px}
+.legend span.m{display:inline}
+svg .gl{stroke:var(--grid);stroke-width:1}
+svg .ax{stroke:var(--axis);stroke-width:1.4}
+svg .arrow{fill:var(--axis)}
+svg .tk{font:10px system-ui,-apple-system,sans-serif;fill:var(--muted)}
+svg .curve{fill:none;stroke:var(--curve);stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round}
+svg .hole{fill:var(--plotbg);stroke:var(--curve);stroke-width:2.2}
+svg .hole.filled{fill:var(--accent);stroke:var(--accent)}
+svg .asy{stroke:var(--accent);stroke-width:1.8;stroke-dasharray:6 4;fill:none}
+svg .pl{stroke:var(--accent);stroke-width:1.5;stroke-dasharray:3 4;fill:none}
+svg .zero{fill:var(--zero);stroke:var(--plotbg);stroke-width:1.5}
+svg .lbl{font:600 11px system-ui,-apple-system,sans-serif;fill:var(--accent);paint-order:stroke;stroke:var(--plotbg);stroke-width:3px;stroke-linejoin:round}
+svg .hlax{stroke:var(--accent);stroke-width:7;opacity:.25}
+svg .org{fill:var(--accent)}
+svg .seg-a{stroke:var(--above);stroke-width:4.5;stroke-linecap:round}
+svg .seg-b{stroke:var(--below);stroke-width:4.5;stroke-linecap:round}
+svg .dotg{fill:var(--curve);stroke:var(--plotbg);stroke-width:1.5}
+svg .dota{fill:var(--accent);stroke:var(--plotbg);stroke-width:1.5}
+svg .fa{fill:var(--above);opacity:.17}
+svg .fbl{fill:var(--below);opacity:.17}
+svg .rlbl{font:700 12px system-ui,-apple-system,sans-serif;paint-order:stroke;stroke:var(--plotbg);stroke-width:4px;stroke-linejoin:round}
+svg .ra{fill:var(--above)}
+svg .rb{fill:var(--below)}
+svg .rz{fill:var(--accent)}
+svg .spx{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round}
+svg .spxb{fill:none;stroke:var(--plotbg);stroke-width:7;stroke-linecap:round}
+.lim{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.05;margin-right:.1em}
+.lim .ls{font-size:.68em;white-space:nowrap}
+svg .sp{fill:var(--plotbg);stroke:var(--accent);stroke-width:2.5}
+
+/* Listen-Aufgaben */
+.qlist{display:grid;gap:8px}
+.qrow{border:1.5px solid var(--line);border-radius:6px;padding:10px;background:var(--surface)}
+.qrow.right{border-color:var(--ok)}
+.qrow.wrong{border-color:var(--bad)}
+.qtop{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.qtop .tf{font-size:1.05rem}
+.qat{font-weight:600;font-size:.92rem}
+
+/* Tabelle */
+.vt{border-collapse:collapse;margin:8px auto;font-variant-numeric:tabular-nums;font-size:.92rem}
+.vt th,.vt td{border:1px solid var(--grid);padding:4px 14px;text-align:right}
+.vt th{background:var(--surface2)}
+.vt tr.a td{background:var(--warnbg);font-weight:700}
+
+/* Vorzeichen */
+.signs{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;font-size:.88rem;margin:4px 0}
+.sg{padding:3px 10px;border-radius:6px;font-weight:700}
+.sg.p{background:var(--okbg);color:var(--ok)}
+.sg.m{background:var(--badbg);color:var(--bad)}
+
+/* Symmetrie-Schritte */
+.steps{display:grid;gap:6px;margin:8px 0}
+.step{padding:8px 10px;border-radius:6px;background:var(--surface2);font-size:.92rem}
+.step.done{background:var(--okbg)}
+.step b{display:block;font-size:.85rem;color:var(--muted)}
+
+/* Restterm */
+.readout{font-size:.92rem;background:var(--surface2);border-radius:6px;padding:8px 10px;margin:6px 0;min-height:3em}
+.above{color:var(--above);font-weight:700}
+.below{color:var(--below);font-weight:700}
+.hlA{background:var(--selbg);border-radius:4px;padding:0 .2em}
+.hlR{background:var(--warnbg);border-radius:4px;padding:0 .2em}
+input[type=range]{width:100%;accent-color:var(--curve);margin:6px 0}
+pre.pd{font:14px/1.4 ui-monospace,Menlo,Consolas,"DejaVu Sans Mono",monospace;background:var(--surface2);padding:10px 12px;border-radius:6px;overflow-x:auto;margin:6px 0}
+details.dd{margin:8px 0}
+details.dd>summary{cursor:pointer;font-weight:600;color:var(--curve)}
+
+/* Strategien */
+.srow{display:grid;gap:6px;padding:10px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface)}
+.srow.right{border-color:var(--ok)}
+.srow.wrong{border-color:var(--bad)}
+.srow .q{font-weight:600}
+.srow .why{font-size:.85rem;color:var(--muted)}
+@media (min-width:760px){.srow{grid-template-columns:1fr 1fr;align-items:center}.srow .why{grid-column:1 / -1}}
+
+footer{color:var(--muted);font-size:.85rem;text-align:center;padding:10px 16px 30px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <h1>Gebrochen-rationale Funktionen</h1>
+    <p class="sub">Prüfungs-Check: Überblick über alles Wichtige, mit kurzen Übungen zum Ausprobieren</p>
+  </div>
+</header>
+
+<nav class="nav" aria-label="Abschnitte">
+  <div class="navin">
+    <a href="#fahrplan">Fahrplan</a>
+    <a href="#dn">D &amp; Nullstellen</a>
+    <a href="#luecken">Hebbare Lücken</a>
+    <a href="#pol">Polstellen</a>
+    <a href="#asym">Asymptoten</a>
+    <a href="#sym">Symmetrie</a>
+    <a href="#rest">Restterm</a>
+    <a href="#strat">Wann was?</a>
+    <a href="#check">Steckbrief</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- ============ FAHRPLAN ============ -->
+<section class="sec" id="fahrplan">
+  <div class="sech"><span class="n">0</span><h2>Dein Fahrplan</h2></div>
+  <p class="lead">Diese Punkte können bei gebrochen-rationalen Funktionen untersucht werden. Die farbigen Kästchen zeigen das passende Werkzeug.</p>
+  <ol class="road">
+    <li><span class="rn">1</span><div><h3>Faktorisieren</h3><p>Zähler und Nenner in Linearfaktoren zerlegen: ausklammern, binomische Formeln, Mitternachtsformel.</p><p><span class="tool">Grundlage für alles</span></p></div></li>
+    <li><span class="rn">2</span><div><h3>Definitionsmenge</h3><p>Lösungen von Nenner = 0 ausschließen: <span class="m">D = ℝ \ {…}</span></p><p><span class="tool">Nenner = 0</span> <a href="#dn">üben</a></p></div></li>
+    <li><span class="rn">3</span><div><h3>Hebbare Definitionslücken</h3><p>Verschwindet (<i>x</i> − <i>a</i>) beim Kürzen ganz aus dem Nenner: stetig behebbare Lücke (Loch). Sonst: Polstelle.</p><p><span class="tool">Kürzen</span> <a href="#luecken">üben</a></p></div></li>
+    <li><span class="rn">4</span><div><h3>Nullstellen</h3><p>Zähler = 0 setzen. Nur Lösungen, die in D liegen, sind Nullstellen.</p><p><span class="tool">Zähler = 0</span> <a href="#dn">üben</a></p></div></li>
+    <li><span class="rn">5</span><div><h3>Art der Polstelle</h3><p>Exponent im gekürzten Nenner: ungerade = mit VZW, gerade = ohne VZW.</p><p><span class="tool">Exponent ansehen</span> <a href="#pol">üben</a></p></div></li>
+    <li><span class="rn">6</span><div><h3>Symmetrie</h3><p>Erst prüfen, ob D symmetrisch zu <i>x</i> = 0 ist. Dann Zähler und Nenner einzeln auf Symmetrie prüfen (nur gerade bzw. nur ungerade Exponenten).</p><p><span class="tool">D prüfen</span><span class="tool">Zähler/Nenner prüfen</span> <a href="#sym">üben</a></p></div></li>
+    <li><span class="rn">7</span><div><h3>Art der Asymptote</h3><p>Zählergrad &lt; Nennergrad: <i>y</i> = 0 · gleich: <i>y</i> = <i>c</i> · Zählergrad = Nennergrad + 1: schräg</p><p><span class="tool">Grade vergleichen</span> <a href="#asym">üben</a></p></div></li>
+    <li><span class="rn">8</span><div><h3>Asymptote &amp; Restterm</h3><p>Polynomdivision liefert <i>f</i>(<i>x</i>) = Asymptote + Restterm.</p><p><span class="tool">Polynomdivision</span> <a href="#rest">üben</a></p></div></li>
+    <li><span class="rn">9</span><div><h3>Restterm auswerten</h3><p>Erst Polynomdivision, dann mit dem Restterm weiterarbeiten: Vorzeichen für <i>x</i> → ±∞ zeigt die Annäherung von oben/unten, Restterm = 0 liefert den Schnittpunkt mit der Asymptote.</p><p><span class="tool">Grenzwert</span><span class="tool">Restterm = 0</span> <a href="#rest">üben</a></p></div></li>
+  </ol>
+  <div class="merke trap">
+    <h3>Typische Schwierigkeiten</h3>
+    <ul>
+      <li>Eine Lösung von Zähler = 0, die nicht in D liegt, ist <b>keine</b> Nullstelle.</li>
+      <li>Exponenten erst <b>nach dem Kürzen</b> ablesen: <span class="m"><span class="fr"><span><i>x</i></span><span><i>x</i><sup>2</sup>(<i>x</i> − 4)</span></span> = <span class="fr"><span>1</span><span><i>x</i>(<i>x</i> − 4)</span></span></span>, bei <i>x</i> = 0 also Polstelle <b>mit</b> VZW.</li>
+      <li>Grad in faktorisierter Form: Exponenten addieren. <span class="m"><i>x</i>(<i>x</i> − 1)<sup>2</sup></span> hat Grad 3.</li>
+      <li>Für die Symmetrie im Zweifel ausmultiplizieren: <span class="m">(<i>x</i> − 1)(<i>x</i> + 1) = <i>x</i><sup>2</sup> − 1</span> hat nur gerade Exponenten, ist also achsensymmetrisch.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ D & NULLSTELLEN ============ -->
+<section class="sec" id="dn">
+  <div class="sech"><span class="n">1</span><h2>Definitionsmenge &amp; Nullstellen</h2></div>
+  <p class="lead">Nenner = 0 liefert die Lücken, Zähler = 0 liefert die Kandidaten für Nullstellen.</p>
+  <div class="cols">
+    <div class="merke">
+      <h3>Definitionsmenge</h3>
+      <ol>
+        <li>Nenner faktorisieren.</li>
+        <li>Nenner = 0 setzen und lösen.</li>
+        <li>Diese Werte ausschließen: <span class="m">D = ℝ \ {<i>x</i><sub>1</sub>; <i>x</i><sub>2</sub>; …}</span></li>
+      </ol>
+      <p>Hat der Nenner keine reelle Nullstelle (z. B. <span class="m"><i>x</i><sup>2</sup> + 1</span>), gilt <span class="m">D = ℝ</span>.</p>
+    </div>
+    <div class="merke">
+      <h3>Nullstellen</h3>
+      <ol>
+        <li>Zähler faktorisieren.</li>
+        <li>Zähler = 0 setzen und lösen.</li>
+        <li><b>Abgleich mit D:</b> Nur Lösungen, die in D liegen, sind Nullstellen.</li>
+      </ol>
+      <p>Wird an einer Stelle Zähler <b>und</b> Nenner 0, liegt dort eine Definitionslücke und keine Nullstelle.</p>
+    </div>
+  </div>
+  <div class="uebung">
+    <h3>Eintippen und am Graph prüfen</h3>
+    <p class="task">Wähle eine Funktion, gib Definitionslücken und Nullstellen ein und vergleiche danach mit dem Graphen.</p>
+    <div id="dnBox"></div>
+  </div>
+</section>
+
+<!-- ============ HEBBARE LÜCKEN ============ -->
+<section class="sec" id="luecken">
+  <div class="sech"><span class="n">2</span><h2>Stetig behebbare Lücken</h2></div>
+  <p class="lead">Ob eine Definitionslücke ein Loch oder eine Polstelle ist, entscheidest du durch Kürzen.</p>
+  <div class="cols">
+    <div class="merke">
+      <h3>Am Term erkennen</h3>
+      <ul>
+        <li>Steht (<i>x</i> − <i>a</i>) in Zähler <b>und</b> Nenner, wird gekürzt.</li>
+        <li>Verschwindet (<i>x</i> − <i>a</i>) dabei <b>ganz</b> aus dem Nenner: <b>stetig behebbare Lücke</b>. Im Graph: ein Loch.</li>
+        <li>Bleibt (<i>x</i> − <i>a</i>) im Nenner übrig: <b>Polstelle</b>, z. B. <span class="m"><span class="fr"><span><i>x</i> − 1</span><span>(<i>x</i> − 1)<sup>2</sup></span></span> = <span class="fr"><span>1</span><span><i>x</i> − 1</span></span></span>.</li>
+      </ul>
+    </div>
+    <div class="merke">
+      <h3>Stetige Fortsetzung</h3>
+      <p>Die stetige Fortsetzung <span class="m"><i>f&#771;</i></span> ist auch an der Stelle <i>a</i> definiert. In der Definitionsmenge der stetigen Fortsetzung muss der <i>x</i>-Wert des „Lochs“ nicht mehr ausgeschlossen werden und im Graph ist das Loch gefüllt.</p>
+      <p>Ihren Term erhält man durch Kürzen, den Wert an der Stelle <i>a</i> durch Einsetzen in den gekürzten Term.</p>
+      <p>Anschaulich: Nähert sich <i>x</i> von links oder rechts der Stelle <i>a</i>, nähern sich die Funktionswerte genau diesem Wert.</p>
+    </div>
+  </div>
+  <div class="uebung">
+    <h3>Hebbar oder Polstelle?</h3>
+    <p class="task">Entscheide für die angegebene Stelle. Tipp: erst kürzen!</p>
+    <div id="hqBox"></div>
+  </div>
+</section>
+
+<!-- ============ POLSTELLEN ============ -->
+<section class="sec" id="pol">
+  <div class="sech"><span class="n">3</span><h2>Polstellen mit und ohne Vorzeichenwechsel</h2></div>
+  <p class="lead">Entscheidend ist der Exponent des Linearfaktors im <b>gekürzten</b> Nenner.</p>
+  <div class="cols">
+    <div class="merke">
+      <h3>Polstellen (Nenner)</h3>
+      <ul>
+        <li>Exponent <b>ungerade</b> (1, 3, …): Polstelle <b>mit</b> VZW. Ein Ast geht nach +∞, der andere nach −∞.</li>
+        <li>Exponent <b>gerade</b> (2, 4, …): Polstelle <b>ohne</b> VZW. Beide Äste gehen in dieselbe Richtung.</li>
+      </ul>
+    </div>
+    <div class="merke">
+      <h3>Gleiche Regel für Nullstellen (Zähler)</h3>
+      <ul>
+        <li>Exponent ungerade: Der Graph <b>schneidet</b> die <i>x</i>-Achse (VZW).</li>
+        <li>Exponent gerade: Der Graph <b>berührt</b> die <i>x</i>-Achse nur (kein VZW).</li>
+      </ul>
+    </div>
+  </div>
+  <div class="uebung">
+    <h3>Exponenten-Labor</h3>
+    <p class="task">Ändere den Exponenten und beobachte, was an der Stelle <i>x</i> = 1 passiert.</p>
+    <div id="plBox"></div>
+  </div>
+  <div class="uebung">
+    <h3>Mit oder ohne VZW?</h3>
+    <p class="task">Entscheide für die angegebene Polstelle.</p>
+    <div id="pqBox"></div>
+  </div>
+</section>
+
+<!-- ============ ASYMPTOTEN ============ -->
+<section class="sec" id="asym">
+  <div class="sech"><span class="n">4</span><h2>Asymptoten über den Gradvergleich</h2></div>
+  <p class="lead">Ein Blick auf Zählergrad und Nennergrad verrät, welche Asymptote du suchst.</p>
+  <div class="cols">
+    <div class="merke">
+      <h3>Zählergrad &lt; Nennergrad</h3>
+      <p>Waagrechte Asymptote <span class="m"><i>y</i> = 0</span> (die <i>x</i>-Achse).</p>
+    </div>
+    <div class="merke">
+      <h3>Zählergrad = Nennergrad</h3>
+      <p>Waagrechte Asymptote <span class="m"><i>y</i> = <i>a</i>/<i>b</i></span>: Leitkoeffizient des Zählers durch Leitkoeffizient des Nenners.</p>
+    </div>
+    <div class="merke">
+      <h3>Zählergrad = Nennergrad + 1</h3>
+      <p>Schräge Asymptote. Die Gleichung liefert die <b>Polynomdivision</b> (siehe Restterm).</p>
+    </div>
+    <div class="merke trap">
+      <h3>Grad richtig bestimmen</h3>
+      <p>In faktorisierter Form die Exponenten addieren: <span class="m">(<i>x</i> + 1)(<i>x</i> − 2)<sup>2</sup></span> hat Grad 1 + 2 = 3.</p>
+    </div>
+  </div>
+  <div class="uebung">
+    <h3>Grad-Blitz</h3>
+    <p class="task">Welche Asymptote hat der Graph? Nach deiner Antwort siehst du den Graphen.</p>
+    <div id="aqBox"></div>
+  </div>
+</section>
+
+<!-- ============ SYMMETRIE ============ -->
+<section class="sec" id="sym">
+  <div class="sech"><span class="n">5</span><h2>Symmetrie mit den Merkregeln</h2></div>
+  <p class="lead">Zuerst die Definitionsmenge prüfen, dann Zähler und Nenner einzeln bewerten.</p>
+  <div class="cols">
+    <div class="merke">
+      <h3>Schritt 1: Ist D symmetrisch zu <i>x</i> = 0?</h3>
+      <p>Zu jeder Lücke <i>a</i> muss auch −<i>a</i> eine Lücke sein. Wenn nicht: <b>keine</b> Symmetrie zum Koordinatensystem, fertig.</p>
+    </div>
+    <div class="merke">
+      <h3>Schritt 2: Zähler und Nenner einzeln bewerten</h3>
+      <ul>
+        <li>nur gerade Exponenten (eine Zahl zählt als <i>x</i><sup>0</sup>): <b>achsensymmetrisch</b></li>
+        <li>nur ungerade Exponenten: <b>punktsymmetrisch</b></li>
+        <li>beides: <b>keine herkömmliche Symmetrie</b></li>
+      </ul>
+    </div>
+    <div class="merke">
+      <h3>Schritt 3: Kombinieren</h3>
+      <ul>
+        <li>gleiche Art (beide achsensymmetrisch oder beide punktsymmetrisch): Graph <b>achsensymmetrisch</b> zur <i>y</i>-Achse</li>
+        <li>verschiedene Art (einer achsensymmetrisch, einer punktsymmetrisch): Graph <b>punktsymmetrisch</b> zum Ursprung</li>
+        <li>Zähler oder Nenner ohne herkömmliche Symmetrie: <b>keine</b> Symmetrie zum KS*</li>
+      </ul>
+      <p class="hint">* gilt für den vollständig gekürzten Term</p>
+    </div>
+    <div class="merke trap">
+      <h3>Faktorisierte Terme</h3>
+      <p>Im Zweifel ausmultiplizieren: <span class="m">(<i>x</i> + 2)(<i>x</i> − 2) = <i>x</i><sup>2</sup> − 4</span> hat nur gerade Exponenten, ist also achsensymmetrisch, obwohl jeder Faktor für sich gemischt ist.</p>
+    </div>
+    <div class="merke">
+      <h3>Rechnerischer Nachweis (falls verlangt)</h3>
+      <p><span class="m"><i>f</i>(−<i>x</i>)</span> bestimmen und mit <span class="m"><i>f</i>(<i>x</i>)</span> bzw. <span class="m">−<i>f</i>(<i>x</i>)</span> abgleichen:</p>
+      <ul>
+        <li><span class="m"><i>f</i>(−<i>x</i>) = <i>f</i>(<i>x</i>)</span>: achsensymmetrisch zur <i>y</i>-Achse</li>
+        <li><span class="m"><i>f</i>(−<i>x</i>) = −<i>f</i>(<i>x</i>)</span>: punktsymmetrisch zum Ursprung</li>
+      </ul>
+    </div>
+  </div>
+  <div class="uebung">
+    <h3>Symmetrie-Check in Schritten</h3>
+    <p class="task">Arbeite die Schritte nacheinander ab. Am Ende siehst du den Graphen.</p>
+    <div id="sqBox"></div>
+  </div>
+</section>
+
+<!-- ============ RESTTERM ============ -->
+<section class="sec" id="rest">
+  <div class="sech"><span class="n">6</span><h2>Polynomdivision &amp; Restterm</h2></div>
+  <p class="lead">Die Polynomdivision zerlegt <i>f</i> in Asymptote und Restterm. Der Restterm verrät dir noch mehr.</p>
+  <div class="merke">
+    <h3>Zerlegung</h3>
+    <p><span class="m"><i>f</i>(<i>x</i>) = <span class="hlA"><i>g</i>(<i>x</i>)</span> + <span class="hlR"><i>R</i>(<i>x</i>)</span></span> mit der Asymptote <span class="m"><i>y</i> = <i>g</i>(<i>x</i>)</span> und dem Restterm <span class="m"><i>R</i>(<i>x</i>)</span>, der für <i>x</i> → ±∞ gegen 0 geht.</p>
+  </div>
+  <div class="cols">
+    <div class="merke">
+      <h3>1) Annäherung von oben oder unten</h3>
+      <p>Vorzeichen von <span class="m"><i>R</i>(<i>x</i>)</span> für <i>x</i> → +∞ und <i>x</i> → −∞ bestimmen:</p>
+      <ul>
+        <li><span class="m"><i>R</i>(<i>x</i>) → 0<sup>+</sup></span>: Graph oberhalb, Annäherung <b>von oben</b></li>
+        <li><span class="m"><i>R</i>(<i>x</i>) → 0<sup>−</sup></span>: Graph unterhalb, Annäherung <b>von unten</b></li>
+      </ul>
+      <p class="hint">Tipp: Setze in Gedanken eine große Zahl ein, z. B. <i>x</i> = 100 bzw. <i>x</i> = −100.</p>
+    </div>
+    <div class="merke">
+      <h3>2) Schnittpunkt mit der Asymptote</h3>
+      <p><span class="m"><i>R</i>(<i>x</i>) = 0</span> setzen, also den <b>Zähler des Restterms</b> gleich 0.</p>
+      <p>Lösung <span class="m"><i>x</i><sub>S</sub></span>: Schnittpunkt <span class="m">S(<i>x</i><sub>S</sub> | <i>g</i>(<i>x</i><sub>S</sub>))</span>. Keine Lösung: kein Schnittpunkt.</p>
+    </div>
+  </div>
+  <div class="uebung">
+    <h3>Restterm-Explorer</h3>
+    <p class="task">Bewege den Regler. Der farbige Strich zeigt den Restterm <i>R</i>(<i>x</i>) an dieser Stelle, also den Abstand zwischen Graph und Asymptote. <span class="above">Grün</span>: Graph liegt oberhalb der Asymptote. <span class="below">Orange</span>: Graph liegt unterhalb.</p>
+    <div id="rxBox"></div>
+  </div>
+</section>
+
+<!-- ============ STRATEGIEN ============ -->
+<section class="sec" id="strat">
+  <div class="sech"><span class="n">7</span><h2>Wann mache ich was?</h2></div>
+  <p class="lead">Ordne jeder typischen Aufgabenstellung das passende Werkzeug zu. Jedes Werkzeug passt genau einmal.</p>
+  <div id="stBox"></div>
+</section>
+
+<!-- ============ STECKBRIEF ============ -->
+<section class="sec" id="check">
+  <div class="sech"><span class="n">8</span><h2>Steckbrief-Check</h2></div>
+  <p class="lead">Alles zusammen: Erstelle den Steckbrief einer Funktion und vergleiche mit dem Graphen.</p>
+  <div id="ckBox"></div>
+</section>
+
+</main>
+<footer>Eingabe-Tipp: Mehrere Werte mit Semikolon trennen (z. B. -2; 3), Dezimalzahlen mit Komma (0,5) oder als Bruch (1/2).</footer>
+
+<script>
+(function(){
+'use strict';
+
+/* =========================================================
+   Hilfsfunktionen
+   ========================================================= */
+function it(s){return s.replace(/(^|[^A-Za-z])([xy])(?![A-Za-z<])/g,'$1<i>$2</i>');}
+function fmt(s){
+  var fs=[];
+  s=String(s).replace(/\[\[([^|\]]+)\|([^\]]+)\]\]/g,function(m,n,d){fs.push(fr(n,d));return '\u0001'+(fs.length-1)+'\u0001';});
+  var out=it(s).replace(/\^(\d)/g,'<sup>$1</sup>').replace(/ - /g,' \u2212 ').replace(/(^|[\s(=\/{;])-(?=\d|<i>|\(|[A-Za-z]|\u0001)/g,'$1\u2212');
+  return out.replace(/\u0001(\d+)\u0001/g,function(m,k){return fs[+k];});
+}
+function fr(n,d){return '<span class="fr"><span>'+fmt(n)+'</span><span>'+fmt(d)+'</span></span>';}
+function fterm(n,d){return '<span class="tf"><i>f</i>(<i>x</i>)&nbsp;=&nbsp;'+fr(n,d)+'</span>';}
+function num(v,dec){
+  if(dec==null)dec=2;
+  var p=Math.pow(10,dec),r=Math.round(v*p)/p;
+  if(r===0)r=0;
+  return String(r).replace('.',',').replace('-','\u2212');
+}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function near(a,b){return Math.abs(a-b)<1e-6;}
+function has(arr,v){for(var i=0;i<arr.length;i++){if(near(arr[i],v))return true;}return false;}
+function diff(a,b){return a.filter(function(v){return !has(b,v);});}
+function sorted(a){return a.slice().sort(function(p,q){return p-q;});}
+function setStr(a){return a.length?'{'+sorted(a).map(function(v){return num(v);}).join('; ')+'}':'{ }';}
+function dStr(g){return g.length?'D = \u211D \\ '+setStr(g):'D = \u211D';}
+function xs(a,j){return sorted(a).map(function(v){return 'x = '+num(v);}).join(j||' und ');}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function keepTop(el){
+  var nav=document.querySelector('.nav'),off=(nav?nav.offsetHeight:0)+12,r=el.getBoundingClientRect();
+  if(r.top<off||r.top>window.innerHeight*0.6)window.scrollTo(0,window.pageYOffset+r.top-off);
+}
+function fb(cls,html){return '<div class="fb '+cls+'">'+html+'</div>';}
+
+function parseList(str){
+  var s=String(str||'').trim().toLowerCase().replace(/\u2212/g,'-');
+  if(/^(|keine?n?|keiner|kein|-|\u2013|leer|\u2205|\{\s*\})$/.test(s))return {ok:true,vals:[]};
+  s=s.replace(/[{}]/g,' ').replace(/x\s*_?\d*\s*=/g,' ').replace(/\s+(und|oder)\s+/g,';');
+  s=s.replace(/(?:\u00b1|\+-|\+\/-)\s*(\d+(?:[.,]\d+)?)/g,'$1;-$1');
+  var chunks=s.split(';'),vals=[];
+  for(var c=0;c<chunks.length;c++){
+    var parts=chunks[c].trim().split(/,\s+|\s+/);
+    for(var i=0;i<parts.length;i++){
+      var raw=parts[i].trim(),p=raw.replace(/^\+/,'').replace(/,/g,'.');
+      if(!p)continue;
+      var v=NaN,m=p.match(/^(-?\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)$/);
+      if(m)v=parseFloat(m[1])/parseFloat(m[2]);
+      else if(/^-?(\d+(\.\d+)?|\.\d+)$/.test(p))v=parseFloat(p);
+      if(!isFinite(v))return {ok:false,bad:raw};
+      if(!has(vals,v))vals.push(v);
+    }
+  }
+  return {ok:true,vals:vals};
+}
+function commaAmb(str){return /\d,\d/.test(str)&&str.indexOf(';')<0;}
+var COMMA=' <br>Tipp: Mehrere Werte mit Semikolon trennen (z. B. -2; 3). Das Komma ist für Dezimalzahlen da.';
+
+/* =========================================================
+   Graph
+   ========================================================= */
+var W=360,H=300,XMIN=-6,XMAX=6,YMIN=-5,YMAX=5,U=30,clipN=0;
+function X(x){return (x-XMIN)*U;}
+function Y(y){return (YMAX-y)*U;}
+var BASE=(function(){
+  var s='',i;
+  for(i=XMIN+1;i<XMAX;i++){if(i)s+='<line class="gl" x1="'+X(i)+'" y1="0" x2="'+X(i)+'" y2="'+H+'"/>';}
+  for(i=YMIN+1;i<YMAX;i++){if(i)s+='<line class="gl" x1="0" y1="'+Y(i)+'" x2="'+W+'" y2="'+Y(i)+'"/>';}
+  s+='<line class="ax" x1="0" y1="'+Y(0)+'" x2="'+(W-2)+'" y2="'+Y(0)+'"/><line class="ax" x1="'+X(0)+'" y1="'+H+'" x2="'+X(0)+'" y2="2"/>';
+  s+='<polygon class="arrow" points="'+W+','+Y(0)+' '+(W-9)+','+(Y(0)-4)+' '+(W-9)+','+(Y(0)+4)+'"/>';
+  s+='<polygon class="arrow" points="'+X(0)+',0 '+(X(0)-4)+',9 '+(X(0)+4)+',9"/>';
+  for(i=XMIN+1;i<XMAX;i++){if(i)s+='<text class="tk" x="'+X(i)+'" y="'+(Y(0)+13)+'" text-anchor="middle">'+num(i)+'</text>';}
+  for(i=YMIN+1;i<YMAX;i++){if(i)s+='<text class="tk" x="'+(X(0)-5)+'" y="'+(Y(i)+3.5)+'" text-anchor="end">'+num(i)+'</text>';}
+  s+='<text class="tk" x="'+(W-4)+'" y="'+(Y(0)-8)+'" text-anchor="end">x</text><text class="tk" x="'+(X(0)+8)+'" y="11">y</text>';
+  return s;
+})();
+function curvePath(f,poles){
+  var b=[XMIN-0.5].concat(sorted(poles),[XMAX+0.5]),d='';
+  for(var k=0;k<b.length-1;k++){
+    var a=b[k]+(k>0?1e-4:0),c=b[k+1]-(k<b.length-2?1e-4:0),pen=false,n=420;
+    if(c<=a)continue;
+    for(var i=0;i<=n;i++){
+      var t=0.5-0.5*Math.cos(Math.PI*i/n),x=a+(c-a)*t,y=f(x);
+      if(!isFinite(y)){pen=false;continue;}
+      var py=Y(y);
+      if(py<-2000)py=-2000;
+      if(py>2300)py=2300;
+      d+=(pen?'L':'M')+X(x).toFixed(1)+' '+py.toFixed(1);
+      pen=true;
+    }
+  }
+  return d;
+}
+function asymLabelPos(a){
+  var cand=[5.7,4.5,3,1.5,-1.5,-3,-4.5];
+  for(var i=0;i<cand.length;i++){var y=a.m*cand[i]+a.b;if(y>YMIN+0.7&&y<YMAX-0.7)return {x:cand[i],y:y};}
+  return null;
+}
+function plot(o){
+  var id='clip'+(++clipN),poles=o.poles||[],ex='',top='';
+  if(o.hl==='y')ex+='<line class="hlax" x1="'+X(0)+'" y1="0" x2="'+X(0)+'" y2="'+H+'"/>';
+  if(o.asym){
+    var a=o.asym;
+    ex+='<line class="asy" x1="'+X(XMIN-1)+'" y1="'+Y(a.m*(XMIN-1)+a.b).toFixed(1)+'" x2="'+X(XMAX+1)+'" y2="'+Y(a.m*(XMAX+1)+a.b).toFixed(1)+'"/>';
+    if(o.asymLabel){
+      var p=asymLabelPos(a);
+      if(p)top+='<text class="lbl" x="'+(X(p.x)-2).toFixed(1)+'" y="'+(Y(p.y)-7).toFixed(1)+'" text-anchor="end">'+o.asymLabel+'</text>';
+    }
+  }
+  if(o.showPoles!==false){
+    poles.forEach(function(q){
+      if(q<XMIN||q>XMAX)return;
+      ex+='<line class="pl" x1="'+X(q)+'" y1="0" x2="'+X(q)+'" y2="'+H+'"/>';
+      var right=X(q)>W-60;
+      top+='<text class="lbl" x="'+(X(q)+(right?-4:4))+'" y="14" text-anchor="'+(right?'end':'start')+'">x = '+num(q)+'</text>';
+    });
+  }
+  (o.zeros||[]).forEach(function(z){top+='<circle class="zero" cx="'+X(z)+'" cy="'+Y(0)+'" r="4.6"/>';});
+  (o.holes||[]).forEach(function(h){top+='<circle class="hole'+(h.fill?' filled':'')+'" cx="'+X(h.x)+'" cy="'+Y(h.y).toFixed(1)+'" r="4.6"/>';});
+  if(o.hl==='o')top+='<circle class="org" cx="'+X(0)+'" cy="'+Y(0)+'" r="5.5"/>';
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+(o.label||'Graph der Funktion')+'">'+
+    '<defs><clipPath id="'+id+'"><rect width="'+W+'" height="'+H+'"/></clipPath></defs>'+BASE+
+    '<g clip-path="url(#'+id+')">'+(o.under||'')+ex+'<path class="curve" d="'+curvePath(o.f,poles)+'"/>'+(o.extra||'')+'</g>'+top+(o.top||'')+'</svg>';
+}
+var LEG={
+  pole:'<span><svg width="12" height="14" aria-hidden="true"><line x1="6" y1="0" x2="6" y2="14" class="pl"/></svg>Polstelle</span>',
+  asym:'<span><svg width="22" height="10" aria-hidden="true"><line x1="0" y1="5" x2="22" y2="5" class="asy"/></svg>Asymptote</span>',
+  hole:'<span><svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.5" class="hole"/></svg>Loch (hebbare Lücke)</span>',
+  zero:'<span><svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.5" class="zero"/></svg>Nullstelle</span>'
+};
+function legend(keys){return '<div class="legend">'+keys.map(function(k){return LEG[k];}).join('')+'</div>';}
+
+/* =========================================================
+   1  Definitionsmenge & Nullstellen
+   ========================================================= */
+var DN=[
+ {num:'x^2 - 1',den:'x^2 - 4x',zf:'(x - 1)(x + 1)',nf:'x(x - 4)',zr:[1,-1],gaps:[0,4],zeros:[-1,1],holes:[],poles:[0,4],
+  f:function(x){return (x*x-1)/(x*x-4*x);},asym:{m:0,b:1}},
+ {num:'x^2 + 2x',den:'2x^2 - 8',zf:'x(x + 2)',nf:'2(x - 2)(x + 2)',zr:[0,-2],gaps:[-2,2],zeros:[0],holes:[{x:-2,y:0.25}],poles:[2],
+  f:function(x){return x/(2*(x-2));},asym:{m:0,b:0.5}},
+ {num:'x^2 - 6x + 9',den:'x^2 + 1',zf:'(x - 3)^2',nf:null,nnote:'x^2 + 1 = 0 hat keine reelle Lösung, denn x^2 + 1 &ge; 1.',zr:[3],gaps:[],zeros:[3],holes:[],poles:[],
+  f:function(x){return (x-3)*(x-3)/(x*x+1);},asym:{m:0,b:1}},
+ {num:'x - 1',den:'x^2 - 2x + 1',zf:null,nf:'(x - 1)^2',zr:[1],gaps:[1],zeros:[],holes:[],poles:[1],
+  f:function(x){return 1/(x-1);},asym:{m:0,b:0}}
+];
+var dnI=0,dnBox=document.getElementById('dnBox');
+function dnShow(){
+  var e=DN[dnI],h='<div class="pick" role="group" aria-label="Funktion wählen">';
+  for(var k=0;k<DN.length;k++)h+='<button type="button" class="pk'+(k===dnI?' on':'')+'" data-pick="'+k+'" aria-pressed="'+(k===dnI)+'">Funktion '+(k+1)+'</button>';
+  h+='</div><div class="termbox">'+fterm(e.num,e.den)+'</div>';
+  h+='<div class="fld">'+
+     '<label><span class="l">Definitionsmenge:</span><span class="dwrap"><span class="dset">D&nbsp;=&nbsp;\u211D&nbsp;\\&nbsp;{</span><input type="text" id="dnG" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="z. B. -2; 3"><span class="dset">}</span></span></label>'+
+     '<label><span class="l">Nullstellen: <i>x</i> =</span><input type="text" id="dnZ" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="z. B. 2 oder keine"></label>'+
+     '<p class="hint">Mehrere Werte mit Semikolon trennen. Wird der Nenner nie 0, bleibt die Klammer leer (dann ist D = \u211D). Gibt es keine Nullstelle, schreibe „keine“.</p></div>';
+  h+='<div class="btns"><button type="button" class="btn primary" data-act="check">Prüfen &amp; Graph zeigen</button><button type="button" class="btn" data-act="way">Lösungsweg</button></div>';
+  h+='<div id="dnFb" aria-live="polite"></div><div id="dnWay" class="way" hidden></div>';
+  h+='<div class="plot" id="dnPlot"><div class="ph">Hier erscheint der Graph, sobald du prüfst.</div></div>';
+  dnBox.innerHTML=h;
+}
+function dnPlot(){
+  var e=DN[dnI];
+  var keys=[];if(e.poles.length)keys.push('pole');if(e.holes.length)keys.push('hole');if(e.zeros.length)keys.push('zero');if(e.asym)keys.push('asym');
+  document.getElementById('dnPlot').innerHTML=plot({f:e.f,poles:e.poles,holes:e.holes,zeros:e.zeros,asym:e.asym})+legend(keys);
+}
+function dnWay(e){
+  var r=[],nline=fmt(e.den)+(e.nf?' = '+fmt(e.nf):'');
+  if(e.gaps.length)r.push('<b>Nenner:</b> '+nline+' = 0 &rArr; '+fmt(xs(e.gaps,' oder '))+'. Also '+dStr(e.gaps)+'.');
+  else r.push('<b>Nenner:</b> '+fmt(e.nnote)+' Also D = \u211D.');
+  r.push('<b>Zähler:</b> '+fmt(e.num)+(e.zf?' = '+fmt(e.zf):'')+' = 0 &rArr; '+fmt(xs(e.zr,' oder '))+'.');
+  var out=e.zr.filter(function(v){return has(e.gaps,v);});
+  r.push('<b>Abgleich mit D:</b> '+(out.length?fmt(xs(out))+' liegt nicht in D, ist also keine Nullstelle.':'Alle Lösungen liegen in D.'));
+  r.push('<b>Ergebnis:</b> '+(e.zeros.length?'Nullstelle(n) '+fmt(xs(e.zeros,', ')):'keine Nullstelle')+'.');
+  if(e.holes.length)r.push('<b>Zusatz:</b> Bei '+fmt(xs(e.holes.map(function(h){return h.x;})))+' kürzt sich der Faktor vollständig weg: stetig behebbare Lücke (Loch).');
+  if(e.poles.length)r.push('<b>Zusatz:</b> Bei '+fmt(xs(e.poles))+' bleibt ein Faktor im Nenner stehen: Polstelle.');
+  return r.map(function(p){return '<p>'+p+'</p>';}).join('');
+}
+function dnCheck(){
+  var e=DN[dnI],gIn=document.getElementById('dnG'),zIn=document.getElementById('dnZ');
+  var pg=parseList(gIn.value),pz=parseList(zIn.value),out='',okG=false,okZ=false;
+  if(!pg.ok)out+=fb('bad','Definitionsmenge: „'+esc(pg.bad)+'“ kann ich nicht lesen.'+COMMA);
+  else{
+    var mg=diff(e.gaps,pg.vals),xg=diff(pg.vals,e.gaps);
+    if(!mg.length&&!xg.length){okG=true;out+=fb('good','Definitionsmenge richtig: '+fmt(dStr(e.gaps))+(e.gaps.length?'':' (der Nenner wird nie 0)')+'.');}
+    else{
+      var t='Definitionsmenge: noch nicht richtig. ';
+      if(!e.gaps.length)t+='Der Nenner '+fmt(e.den)+' wird für keine reelle Zahl 0. Die Klammer bleibt also leer, D = \u211D. ';
+      else{
+        if(xg.length)t+=fmt('Bei '+xs(xg)+' wird der Nenner nicht 0. ');
+        if(mg.length)t+='Es fehlt mindestens eine Nennernullstelle. Faktorisiere den Nenner vollständig. ';
+      }
+      if(commaAmb(gIn.value))t+=COMMA;
+      out+=fb('bad',t);
+    }
+  }
+  if(!pz.ok)out+=fb('bad','Nullstellen: „'+esc(pz.bad)+'“ kann ich nicht lesen.'+COMMA);
+  else{
+    var mz=diff(e.zeros,pz.vals),xz=diff(pz.vals,e.zeros);
+    if(!mz.length&&!xz.length){
+      okZ=true;
+      var trap=e.zr.filter(function(v){return has(e.gaps,v);});
+      out+=fb('good',(e.zeros.length?'Nullstellen richtig: '+fmt(xs(e.zeros,', ')):'Richtig: f hat keine Nullstelle')+'.'+
+        (trap.length?' Gut aufgepasst: '+fmt(xs(trap))+' löst zwar Zähler = 0, liegt aber nicht in D.':''));
+    }else{
+      var u='Nullstellen: noch nicht richtig. ';
+      var inGap=xz.filter(function(v){return has(e.gaps,v)&&has(e.zr,v);});
+      var other=xz.filter(function(v){return !has(inGap,v);});
+      if(inGap.length)u+=fmt(xs(inGap))+' löst zwar Zähler = 0, liegt aber nicht in D. Dort ist eine Definitionslücke, keine Nullstelle. ';
+      if(other.length)u+=fmt('Bei '+xs(other)+' wird der Zähler nicht 0. ');
+      if(mz.length)u+='Es fehlt eine Nullstelle. Setze den faktorisierten Zähler gleich 0. ';
+      if(commaAmb(zIn.value))u+=COMMA;
+      out+=fb('bad',u);
+    }
+  }
+  gIn.className=pg.ok?(okG?'ok':'no'):'no';
+  zIn.className=pz.ok?(okZ?'ok':'no'):'no';
+  if(okG&&okZ)out+=fb('info','Vergleiche mit dem Graphen: Polstellen als gestrichelte Linien, Löcher als offene Kreise, Nullstellen als Punkte.');
+  document.getElementById('dnFb').innerHTML=out;
+  dnPlot();
+}
+dnBox.addEventListener('click',function(ev){
+  var b=ev.target.closest('button');if(!b)return;
+  if(b.hasAttribute('data-pick')){dnI=+b.getAttribute('data-pick');dnShow();return;}
+  var a=b.getAttribute('data-act');
+  if(a==='check')dnCheck();
+  else if(a==='way'){
+    var w=document.getElementById('dnWay');
+    if(w.hidden){w.innerHTML=dnWay(DN[dnI]);w.hidden=false;dnPlot();}else w.hidden=true;
+  }
+});
+dnBox.addEventListener('keydown',function(ev){if(ev.key==='Enter'&&ev.target.tagName==='INPUT'){ev.preventDefault();dnCheck();}});
+dnShow();
+
+/* =========================================================
+   2  Stetig behebbare Lücken
+   ========================================================= */
+
+/* Quiz: hebbar oder Polstelle */
+function makeQuiz(box,items,opts,optLabel){
+  var state=items.map(function(){return null;});
+  function render(){
+    var right=0,done=0,h='<div class="qlist">';
+    items.forEach(function(q,i){
+      var s=state[i];
+      if(s!==null){done++;if(s===q.ans)right++;}
+      h+='<div class="qrow'+(s===null?'':(s===q.ans?' right':' wrong'))+'"><div class="qtop">'+fterm(q.num,q.den)+'<span class="qat">Stelle '+fmt('x = '+num(q.a))+'</span></div><div class="opts">';
+      opts.forEach(function(o){
+        var cls='opt';
+        if(s!==null){if(o[0]===q.ans)cls+=' right';else if(o[0]===s)cls+=' wrong';}
+        h+='<button type="button" class="'+cls+'" data-q="'+i+'" data-v="'+o[0]+'" aria-pressed="'+(s===o[0])+'">'+o[1]+'</button>';
+      });
+      h+='</div>';
+      if(s!==null)h+=fb(s===q.ans?'good':'bad',(s===q.ans?'Richtig. ':'Leider falsch. ')+fmt(q.ex));
+      h+='</div>';
+    });
+    h+='</div><div class="btns" style="align-items:center"><span class="score" aria-live="polite">'+right+' von '+items.length+' richtig'+(done===items.length?(right===items.length?' – perfekt!':''):'')+'</span><button type="button" class="btn" data-reset="1">Nochmal</button></div>';
+    box.innerHTML=h;
+  }
+  box.addEventListener('click',function(ev){
+    var b=ev.target.closest('button');if(!b)return;
+    if(b.hasAttribute('data-reset')){state=items.map(function(){return null;});render();return;}
+    var i=+b.getAttribute('data-q');
+    if(isNaN(i)||state[i]!==null)return;
+    state[i]=b.getAttribute('data-v');render();
+  });
+  render();
+}
+makeQuiz(document.getElementById('hqBox'),[
+ {num:'x - 2',den:'(x - 2)(x + 1)',a:2,ans:'h',ex:'Der Faktor (x - 2) steht in Zähler und Nenner. Gekürzt: f(x) = [[1|x + 1]]. (x - 2) ist ganz aus dem Nenner verschwunden: stetig behebbar, Loch bei (2 | [[1|3]]).'},
+ {num:'x + 3',den:'(x - 1)(x + 4)',a:1,ans:'p',ex:'Zähler und Nenner haben keinen gemeinsamen Faktor, man kann nichts kürzen. Bei x = 1 wird nur der Nenner 0: Polstelle.'},
+ {num:'x^2 - 9',den:'x^2 + 6x + 9',a:-3,ans:'p',ex:'Binomische Formeln rückwärts: x^2 - 9 = (x - 3)(x + 3) und x^2 + 6x + 9 = (x + 3)^2. Gekürzt: f(x) = [[x - 3|x + 3]]. Der Faktor (x + 3) steht weiterhin im Nenner: Polstelle.'},
+ {num:'x^2 - 4x + 4',den:'x^2 - 4',a:2,ans:'h',ex:'Binomische Formeln rückwärts: x^2 - 4x + 4 = (x - 2)^2 und x^2 - 4 = (x - 2)(x + 2). Gekürzt: f(x) = [[x - 2|x + 2]]. (x - 2) ist ganz aus dem Nenner verschwunden: stetig behebbar. Das Loch liegt bei (2 | 0) auf der x-Achse, x = 2 ist trotzdem keine Nullstelle.'},
+ {num:'2x^2 - 8',den:'x^2 + 2x',a:-2,ans:'h',ex:'Ausklammern und binomische Formel: 2x^2 - 8 = 2(x - 2)(x + 2) und x^2 + 2x = x(x + 2). Gekürzt: f(x) = [[2(x - 2)|x]]. (x + 2) ist ganz weg: stetig behebbar, Loch bei (-2 | 4).'}
+],[['h','stetig behebbar'],['p','Polstelle']]);
+
+/* =========================================================
+   3  Polstellen
+   ========================================================= */
+var plBox=document.getElementById('plBox'),pl={pos:'N',k:1};
+function plRender(){
+  var k=pl.k,f,term,cap,signs,n=pl.pos==='N';
+  if(n){
+    f=function(x){return 2/Math.pow(x-1,k);};
+    term=fterm('2','(x - 1)^'+k);
+  }else{
+    f=function(x){return 3*Math.pow(x-1,k)/(x*x+1);};
+    term=fterm('3(x - 1)^'+k,'x^2 + 1');
+  }
+  var odd=k%2===1,sl=f(0.9)>0,sr=f(1.1)>0;
+  signs='<div class="signs"><span>links von 1:</span><span class="sg '+(sl?'p':'m')+'">'+(sl?'+':'\u2212')+'</span><span>rechts von 1:</span><span class="sg '+(sr?'p':'m')+'">'+(sr?'+':'\u2212')+'</span></div>';
+  if(n)cap=odd?'Exponent '+k+' ist <b>ungerade</b>: Polstelle <b>mit</b> Vorzeichenwechsel. Links geht der Graph nach −∞, rechts nach +∞.'
+             :'Exponent '+k+' ist <b>gerade</b>: Polstelle <b>ohne</b> Vorzeichenwechsel. Beide Äste gehen nach +∞.';
+  else cap=odd?'Exponent '+k+' ist <b>ungerade</b>: Der Graph <b>schneidet</b> die '+fmt('x')+'-Achse bei 1 (VZW).'
+             :'Exponent '+k+' ist <b>gerade</b>: Der Graph <b>berührt</b> die '+fmt('x')+'-Achse bei 1 nur (kein VZW).';
+  var h='<div class="ctl"><span>Faktor (<i>x</i> − 1)<sup><i>k</i></sup> steht im</span><span class="seg" role="group" aria-label="Position">'+
+    '<button type="button" data-pos="N" class="'+(n?'on':'')+'" aria-pressed="'+n+'">Nenner</button><button type="button" data-pos="Z" class="'+(!n?'on':'')+'" aria-pressed="'+(!n)+'">Zähler</button></span></div>';
+  h+='<div class="ctl"><span>Exponent <i>k</i> =</span><span class="seg" role="group" aria-label="Exponent">';
+  for(var j=1;j<=4;j++)h+='<button type="button" data-k="'+j+'" class="'+(j===k?'on':'')+'" aria-pressed="'+(j===k)+'">'+j+'</button>';
+  h+='</span></div><div class="termbox">'+term+'</div>';
+  h+='<div class="plot">'+plot({f:f,poles:n?[1]:[],zeros:n?[]:[1],asym:{m:0,b:0}})+legend(n?['pole','asym']:['zero','asym'])+'</div>';
+  h+=signs+fb('info',cap);
+  plBox.innerHTML=h;
+}
+plBox.addEventListener('click',function(ev){
+  var b=ev.target.closest('button');if(!b)return;
+  if(b.hasAttribute('data-pos'))pl.pos=b.getAttribute('data-pos');
+  if(b.hasAttribute('data-k'))pl.k=+b.getAttribute('data-k');
+  plRender();
+});
+plRender();
+
+makeQuiz(document.getElementById('pqBox'),[
+ {num:'x + 2',den:'(x - 1)^2(x + 3)',a:1,ans:'o',ex:'(x - 1) steht mit Exponent 2 (gerade) im Nenner: Polstelle ohne Vorzeichenwechsel.'},
+ {num:'x + 2',den:'(x - 1)^2(x + 3)',a:-3,ans:'m',ex:'(x + 3) steht mit Exponent 1 (ungerade) im Nenner: Polstelle mit Vorzeichenwechsel.'},
+ {num:'x',den:'x^3 - 4x^2',a:0,ans:'m',ex:'x^3 - 4x^2 = x^2(x - 4). Gekürzt: f(x) = [[1|x(x - 4)]]. Nach dem Kürzen hat x nur noch Exponent 1: mit Vorzeichenwechsel. Achtung: Exponent erst nach dem Kürzen ablesen!'},
+ {num:'5',den:'x^2 + 4x + 4',a:-2,ans:'o',ex:'x^2 + 4x + 4 = (x + 2)^2. Exponent 2 ist gerade: ohne Vorzeichenwechsel.'},
+ {num:'x - 2',den:'(x - 2)^3',a:2,ans:'o',ex:'Gekürzt: f(x) = [[1|(x - 2)^2]]. Exponent 2 ist gerade: ohne Vorzeichenwechsel.'},
+ {num:'x + 1',den:'(x - 2)^3',a:2,ans:'m',ex:'(x - 2) steht mit Exponent 3 (ungerade) im Nenner, der Zähler wird bei x = 2 nicht 0: mit Vorzeichenwechsel.'}
+],[['m','mit VZW'],['o','ohne VZW']]);
+
+/* =========================================================
+   4  Asymptoten-Blitz
+   ========================================================= */
+var AQ=[
+ {num:'4x',den:'x^2 - 1',t:'0',asym:{m:0,b:0},lab:'y = 0',poles:[-1,1],f:function(x){return 4*x/(x*x-1);},ex:'Zählergrad 1 &lt; Nennergrad 2: waagrechte Asymptote y = 0 (x-Achse).'},
+ {num:'3x^2 - 1',den:'x^2 + 2',t:'c',asym:{m:0,b:3},lab:'y = 3',poles:[],f:function(x){return (3*x*x-1)/(x*x+2);},ex:'Zählergrad 2 = Nennergrad 2: waagrechte Asymptote y = 3 : 1 = 3 (Quotient der Leitkoeffizienten).'},
+ {num:'x^2 - 3',den:'x - 2',t:'s',asym:{m:1,b:2},lab:'y = x + 2',poles:[2],f:function(x){return (x*x-3)/(x-2);},ex:'Zählergrad 2 = Nennergrad 1 + 1: schräge Asymptote. Polynomdivision: f(x) = x + 2 + [[1|x - 2]], also y = x + 2.'},
+ {num:'2x + 6',den:'x - 1',t:'c',asym:{m:0,b:2},lab:'y = 2',poles:[1],f:function(x){return (2*x+6)/(x-1);},ex:'Zählergrad 1 = Nennergrad 1: waagrechte Asymptote y = 2 : 1 = 2.'},
+ {num:'x^3',den:'(x - 1)(x + 2)',t:'s',asym:{m:1,b:-1},lab:'y = x \u2212 1',poles:[-2,1],f:function(x){return x*x*x/((x-1)*(x+2));},ex:'Nennergrad 1 + 1 = 2 (Exponenten addieren). Zählergrad 3 = 2 + 1: schräge Asymptote, per Polynomdivision y = x - 1.'},
+ {num:'5',den:'x^2 + 1',t:'0',asym:{m:0,b:0},lab:'y = 0',poles:[],f:function(x){return 5/(x*x+1);},ex:'Eine Zahl hat Grad 0 &lt; Nennergrad 2: waagrechte Asymptote y = 0.'},
+ {num:'(x - 2)^2',den:'x^2 + 1',t:'c',asym:{m:0,b:1},lab:'y = 1',poles:[],f:function(x){return (x-2)*(x-2)/(x*x+1);},ex:'(x - 2)^2 hat Grad 2 und Leitkoeffizient 1. Zählergrad = Nennergrad: waagrechte Asymptote y = 1 : 1 = 1.'},
+ {num:'3x^2',den:'(x + 1)(x - 2)^2',t:'0',asym:{m:0,b:0},lab:'y = 0',poles:[-1,2],f:function(x){return 3*x*x/((x+1)*(x-2)*(x-2));},ex:'Nennergrad 1 + 2 = 3 &gt; Zählergrad 2: waagrechte Asymptote y = 0.'},
+ {num:'x^2 - x',den:'2x^2 + 2',t:'c',asym:{m:0,b:0.5},lab:'y = 0,5',poles:[],f:function(x){return (x*x-x)/(2*x*x+2);},ex:'Zählergrad = Nennergrad: y = 1 : 2 = 0,5. Achtung: Der Leitkoeffizient des Nenners ist 2!'}
+];
+var AOPT=[['0','waagrecht: y = 0'],['c','waagrecht: y = c (c ≠ 0)'],['s','schräg']];
+var aq={i:0,ans:null,right:0,answered:0},aqBox=document.getElementById('aqBox');
+function aqRender(){
+  var h;
+  if(aq.i>=AQ.length){
+    h=fb(aq.right===AQ.length?'good':'info','Geschafft: '+aq.right+' von '+AQ.length+' richtig.'+(aq.right<AQ.length?' Wiederhole am besten die Merke-Boxen oben und starte nochmal.':' Perfekt!'))+
+      '<div class="btns"><button type="button" class="btn primary" data-act="restart">Nochmal von vorn</button></div>';
+    aqBox.innerHTML=h;return;
+  }
+  var q=AQ[aq.i];
+  h='<div class="btns" style="align-items:center;margin-top:0"><span class="score">Aufgabe '+(aq.i+1)+' von '+AQ.length+' · '+aq.right+' richtig</span></div>';
+  h+='<div class="termbox">'+fterm(q.num,q.den)+'</div><div class="opts">';
+  AOPT.forEach(function(o){
+    var cls='opt';
+    if(aq.ans!==null){if(o[0]===q.t)cls+=' right';else if(o[0]===aq.ans)cls+=' wrong';}
+    h+='<button type="button" class="'+cls+'" data-v="'+o[0]+'">'+fmt(o[1])+'</button>';
+  });
+  h+='</div>';
+  if(aq.ans===null)h+='<div class="plot"><div class="ph ph-plot">Der Graph erscheint nach deiner Antwort.</div></div>';
+  if(aq.ans!==null){
+    h+=fb(aq.ans===q.t?'good':'bad',(aq.ans===q.t?'Richtig. ':'Leider falsch. ')+fmt(q.ex));
+    h+='<div class="plot">'+plot({f:q.f,poles:q.poles,asym:q.asym,asymLabel:q.lab})+legend(q.poles.length?['pole','asym']:['asym'])+'</div>';
+    h+='<div class="btns"><button type="button" class="btn primary" data-act="next">'+(aq.i<AQ.length-1?'Nächste Funktion':'Auswertung')+'</button></div>';
+  }
+  aqBox.innerHTML=h;
+}
+aqBox.addEventListener('click',function(ev){
+  var b=ev.target.closest('button');if(!b)return;
+  var a=b.getAttribute('data-act');
+  if(a==='next'){aq.i++;aq.ans=null;aqRender();keepTop(aqBox);return;}
+  if(a==='restart'){aq={i:0,ans:null,right:0,answered:0};aqRender();keepTop(aqBox);return;}
+  if(b.hasAttribute('data-v')&&aq.ans===null){aq.ans=b.getAttribute('data-v');if(aq.ans===AQ[aq.i].t)aq.right++;aqRender();}
+});
+aqRender();
+
+/* =========================================================
+   5  Symmetrie
+   ========================================================= */
+var SQ=[
+ {num:'x^2 - 1',den:'x^2 - 4',d:true,z:'g',n:'g',dT:'Nenner = 0 bei x = ±2: D = ℝ \\ {−2; 2} ist symmetrisch.',zT:'x^2 - 1: Exponenten 2 und 0, nur gerade: achsensymmetrisch.',nT:'x^2 - 4: Exponenten 2 und 0, nur gerade: achsensymmetrisch.',
+  pr:'f(-x) = [[(-x)^2 - 1|(-x)^2 - 4]] = [[x^2 - 1|x^2 - 4]] = f(x) ⇒ achsensymmetrisch zur y-Achse.',f:function(x){return (x*x-1)/(x*x-4);},poles:[-2,2],holes:[]},
+ {num:'3x',den:'x^2 + 1',d:true,z:'u',n:'g',dT:'Der Nenner wird nie 0: D = ℝ ist symmetrisch.',zT:'3x: Exponent 1, nur ungerade: punktsymmetrisch.',nT:'x^2 + 1: Exponenten 2 und 0, nur gerade: achsensymmetrisch.',
+  pr:'f(-x) = [[3 · (-x)|(-x)^2 + 1]] = [[-3x|x^2 + 1]] = -[[3x|x^2 + 1]] = -f(x) ⇒ punktsymmetrisch zum Ursprung.',f:function(x){return 3*x/(x*x+1);},poles:[],holes:[]},
+ {num:'x^2 + 1',den:'x - 1',d:false,dT:'Nenner = 0 bei x = 1: D = ℝ \\ {1}. Die Zahl −1 gehört zu D, die 1 aber nicht. D ist nicht symmetrisch.',
+  pr:'Hier ist kein Vergleich von f(-x) nötig: D = ℝ \\ {1} ist nicht symmetrisch (-1 ∈ D, aber 1 ∉ D). Deshalb kann keine Symmetrie zum Koordinatensystem vorliegen.',f:function(x){return (x*x+1)/(x-1);},poles:[1],holes:[]},
+ {num:'x^3 - x',den:'x^2 - 9',d:true,z:'u',n:'g',dT:'Nenner = 0 bei x = ±3: D = ℝ \\ {−3; 3} ist symmetrisch.',zT:'x^3 - x: Exponenten 3 und 1, nur ungerade: punktsymmetrisch.',nT:'x^2 - 9: Exponenten 2 und 0, nur gerade: achsensymmetrisch.',
+  pr:'f(-x) = [[(-x)^3 - (-x)|(-x)^2 - 9]] = [[-x^3 + x|x^2 - 9]] = -[[x^3 - x|x^2 - 9]] = -f(x) ⇒ punktsymmetrisch zum Ursprung.',f:function(x){return (x*x*x-x)/(x*x-9);},poles:[-3,3],holes:[]},
+ {num:'x^2 + x',den:'x^2 + 1',d:true,z:'m',n:'g',dT:'Der Nenner wird nie 0: D = ℝ ist symmetrisch.',zT:'x^2 + x: Exponenten 2 und 1, gemischt: keine herkömmliche Symmetrie.',nT:'x^2 + 1: Exponenten 2 und 0, nur gerade: achsensymmetrisch.',
+  pr:'f(-x) = [[(-x)^2 + (-x)|(-x)^2 + 1]] = [[x^2 - x|x^2 + 1]]. Das ist weder f(x) = [[x^2 + x|x^2 + 1]] noch -f(x) = [[-x^2 - x|x^2 + 1]] ⇒ keine Symmetrie zum Koordinatensystem.',f:function(x){return (x*x+x)/(x*x+1);},poles:[],holes:[]}
+];
+var KIND={g:'achsensymmetrisch (nur gerade Exponenten)',u:'punktsymmetrisch (nur ungerade Exponenten)',m:'keine herkömmliche Symmetrie (gemischt)'};
+function fmtf(s){return fmt(s).replace(/(^|[^A-Za-z>])f\(/g,'$1<i>f</i>(');}
+var RES={A:'achsensymmetrisch zur y-Achse',P:'punktsymmetrisch zum Ursprung',K:'nicht symmetrisch zum Koordinatensystem'};
+function sqRes(q){if(!q.d||q.z==='m'||q.n==='m')return 'K';return q.z===q.n?'A':'P';}
+var sq={i:0,step:0,msg:'',right:0,mist:0},sqBox=document.getElementById('sqBox');
+function sqRender(){
+  var q=SQ[sq.i],r=sqRes(q),h='<div class="pick" role="group" aria-label="Funktion wählen">';
+  for(var k=0;k<SQ.length;k++)h+='<button type="button" class="pk'+(k===sq.i?' on':'')+'" data-pick="'+k+'" aria-pressed="'+(k===sq.i)+'">'+(k+1)+'</button>';
+  h+='</div><div class="termbox">'+fterm(q.num,q.den)+'</div><div class="steps">';
+  if(sq.step>0)h+='<div class="step done"><b>Schritt 1: Definitionsmenge</b>'+fmt(q.dT)+'</div>';
+  if(sq.step>1&&q.d)h+='<div class="step done"><b>Schritt 2: Zähler</b>'+fmt(q.zT)+'</div>';
+  if(sq.step>2&&q.d)h+='<div class="step done"><b>Schritt 3: Nenner</b>'+fmt(q.nT)+'</div>';
+  h+='</div>';
+  var done=(!q.d&&sq.step>=1)||sq.step>=4,ask='',opts=[];
+  if(!done){
+    if(sq.step===0){ask='Schritt 1: Ist die Definitionsmenge symmetrisch zu '+fmt('x = 0')+'?';opts=[['j','ja'],['n','nein']];}
+    else if(sq.step===1){ask='Schritt 2: Wie ist der Zähler (ausmultipliziert) symmetrisch?';opts=[['g',KIND.g],['u',KIND.u],['m',KIND.m]];}
+    else if(sq.step===2){ask='Schritt 3: Und wie ist der Nenner symmetrisch?';opts=[['g',KIND.g],['u',KIND.u],['m',KIND.m]];}
+    else{ask='Schritt 4: Also ist der Graph …';opts=[['A',RES.A],['P',RES.P],['K',RES.K]];}
+    h+='<p style="font-weight:600;margin:8px 0 0">'+ask+'</p><div class="opts">';
+    opts.forEach(function(o){h+='<button type="button" class="opt" data-v="'+o[0]+'">'+fmt(o[1])+'</button>';});
+    h+='</div>'+(sq.msg?fb('bad',sq.msg):'');
+  }else{
+    var why;
+    if(!q.d)why='Da D nicht symmetrisch ist, kann der Graph weder zur y-Achse noch zum Ursprung symmetrisch sein.';
+    else if(q.z==='m'||q.n==='m')why=(q.z==='m'?'Der Zähler':'Der Nenner')+' hat keine herkömmliche Symmetrie: keine Symmetrie zum Koordinatensystem.';
+    else why='Zähler '+(q.z==='g'?'achsensymmetrisch':'punktsymmetrisch')+', Nenner '+(q.n==='g'?'achsensymmetrisch':'punktsymmetrisch')+': '+(q.z===q.n?'gleiche Art, also Achsensymmetrie.':'verschiedene Art, also Punktsymmetrie.');
+    h+=fb('good','Ergebnis: Der Graph ist <b>'+fmt(RES[r])+'</b>. '+fmt(why)+(sq.mist?' ('+sq.mist+' Fehlversuch'+(sq.mist>1?'e':'')+')':''));
+    h+='<details class="dd"><summary>Rechnerischen Nachweis anzeigen</summary><div class="way"><p>'+fmtf(q.pr)+'</p></div></details>';
+    h+='<div class="plot">'+plot({f:q.f,poles:q.poles,holes:q.holes,hl:r==='A'?'y':(r==='P'?'o':null)})+'</div>';
+    if(r!=='K')h+='<p class="hint" style="text-align:center">'+(r==='A'?'Hervorgehoben: die Symmetrieachse (y-Achse).':'Hervorgehoben: das Symmetriezentrum (Ursprung).')+'</p>';
+    h+='<div class="btns"><button type="button" class="btn primary" data-act="next">'+(sq.i<SQ.length-1?'Nächste Funktion':'Von vorn')+'</button></div>';
+  }
+  sqBox.innerHTML=h;
+}
+function sqAnswer(v){
+  var q=SQ[sq.i],ok;
+  if(sq.step===0){ok=(v==='j')===q.d;if(!ok)sq.msg=fmt('Noch nicht. Bestimme die Nennernullstellen. D ist symmetrisch, wenn zu jeder Lücke a auch -a eine Lücke ist.');}
+  else if(sq.step===1){ok=v===q.z;if(!ok)sq.msg=fmt('Noch nicht. Multipliziere aus und sieh dir alle Exponenten an: nur gerade: achsensymmetrisch, nur ungerade: punktsymmetrisch, beides: keine herkömmliche Symmetrie. Eine Zahl ohne x zählt als x^0.');}
+  else if(sq.step===2){ok=v===q.n;if(!ok)sq.msg=fmt('Noch nicht. Sieh dir alle Exponenten im Nenner an: nur gerade: achsensymmetrisch, nur ungerade: punktsymmetrisch, beides: keine herkömmliche Symmetrie. Eine Zahl ohne x zählt als x^0.');}
+  else{ok=v===sqRes(q);if(!ok)sq.msg='Noch nicht. Zähler und Nenner gleicher Art (beide achsensymmetrisch oder beide punktsymmetrisch): Achsensymmetrie. Verschiedene Art: Punktsymmetrie. Hat einer keine herkömmliche Symmetrie: keine Symmetrie zum KS.';}
+  if(ok){sq.step++;sq.msg='';}else sq.mist++;
+  sqRender();
+}
+sqBox.addEventListener('click',function(ev){
+  var b=ev.target.closest('button');if(!b)return;
+  if(b.hasAttribute('data-pick')){sq={i:+b.getAttribute('data-pick'),step:0,msg:'',mist:0};sqRender();return;}
+  if(b.getAttribute('data-act')==='next'){sq={i:(sq.i+1)%SQ.length,step:0,msg:'',mist:0};sqRender();keepTop(sqBox);return;}
+  if(b.hasAttribute('data-v'))sqAnswer(b.getAttribute('data-v'));
+});
+sqRender();
+
+/* =========================================================
+   6  Restterm
+   ========================================================= */
+var RX=[
+ {num:'x^3',den:'x^2 + 1',g:{m:1,b:0},gT:'y = x',gH:'x',rH:fr('-x','x^2 + 1'),rT:'[[-x|x^2 + 1]]',rn:'R',
+  x0:1.5,f:function(x){return x*x*x/(x*x+1);},poles:[],lp:'u',ln:'o',S:[0],
+  lpN:'Zähler → −∞, Nenner → +∞, Nennergrad 2 &gt; Zählergrad 1',lnN:'Zähler → +∞, Nenner → +∞, Nennergrad 2 &gt; Zählergrad 1',
+  div:' (x³ + 0x² + 0x) : (x² + 1) = x + (−x)/(x² + 1)\n−(x³        + x)\n ───────────────\n             −x    ← Rest',
+  limT:'Für x → +∞ nähert sich der Graph also von unten, für x → −∞ von oben.',
+  sT:'R(x) = 0 ⇔ −x = 0 ⇔ x = 0. Schnittpunkt S(0 | 0), den y-Wert liefert die Asymptote y = x.'},
+ {num:'2x^2 + x',den:'x^2 + 1',g:{m:0,b:2},gT:'y = 2',gH:'2',rH:fr('x - 2','x^2 + 1'),rT:'[[x - 2|x^2 + 1]]',rn:'R',
+  x0:-2,f:function(x){return (2*x*x+x)/(x*x+1);},poles:[],lp:'o',ln:'u',S:[2],
+  lpN:'Zähler → +∞, Nenner → +∞, Nennergrad 2 &gt; Zählergrad 1',lnN:'Zähler → −∞, Nenner → +∞, Nennergrad 2 &gt; Zählergrad 1',
+  div:' (2x² + x + 0) : (x² + 1) = 2 + (x − 2)/(x² + 1)\n−(2x²     + 2)\n ─────────────\n        x − 2    ← Rest',
+  limT:'Für x → +∞ nähert sich der Graph also von oben, für x → −∞ von unten.',
+  sT:'R(x) = 0 ⇔ x − 2 = 0 ⇔ x = 2. Schnittpunkt S(2 | 2).'},
+ {num:'x - 1',den:'x^2 + 1',g:{m:0,b:0},gT:'y = 0',gH:'0',rH:fr('x - 1','x^2 + 1'),rT:'[[x - 1|x^2 + 1]]',rn:'f',
+  x0:3,f:function(x){return (x-1)/(x*x+1);},poles:[],lp:'o',ln:'u',S:[1],
+  lpN:'Zähler → +∞, Nenner → +∞, Nennergrad 2 &gt; Zählergrad 1',lnN:'Zähler → −∞, Nenner → +∞, Nennergrad 2 &gt; Zählergrad 1',
+  div:null,
+  limT:'Hier ist der Restterm f(x) selbst. Für x → +∞ nähert sich der Graph also von oben, für x → −∞ von unten.',
+  sT:'f(x) = 0 ⇔ x − 1 = 0 ⇔ x = 1. Der Schnittpunkt mit der Asymptote y = 0 ist die Nullstelle S(1 | 0).'}
+];
+function limSym(s){return '<span class="lim"><span>lim</span><span class="ls">'+fmt('x → '+s)+'</span></span>';}
+function limHTML(e,dir){
+  var s=dir>0?'+∞':'−∞',res=(dir>0?e.lp:e.ln)==='o'?'0<sup>+</sup>':'0<sup>−</sup>';
+  return '<p><span class="tf">'+limSym(s)+'&nbsp;<i>'+e.rn+'</i>(<i>x</i>)&nbsp;=&nbsp;'+limSym(s)+'&nbsp;'+fmt(e.rT)+'&nbsp;=&nbsp;'+res+'</span> <span class="hint">('+fmt(dir>0?e.lpN:e.lnN)+')</span></p>';
+}
+var rx={i:0,x:1.5,p:null,n:null,checked:false},rxBox=document.getElementById('rxBox');
+function rxG(e,x){return e.g.m*x+e.g.b;}
+function clampPx(v){return Math.max(-400,Math.min(H+400,v));}
+function rxFill(e){
+  var b=[XMIN].concat(sorted(e.poles).filter(function(q){return q>XMIN&&q<XMAX;}),[XMAX]),s='',run,sign;
+  function flush(){
+    if(run.length>1){
+      var pts=run.map(function(q){return X(q[0]).toFixed(1)+','+clampPx(Y(q[1])).toFixed(1);});
+      var back=run.slice().reverse().map(function(q){return X(q[0]).toFixed(1)+','+clampPx(Y(rxG(e,q[0]))).toFixed(1);});
+      s+='<polygon class="'+(sign>0?'fa':'fbl')+'" points="'+pts.concat(back).join(' ')+'"/>';
+    }
+    run=[];
+  }
+  for(var k=0;k<b.length-1;k++){
+    var a=b[k]+(k>0?0.01:0),c=b[k+1]-(k<b.length-2?0.01:0),n=300;
+    run=[];sign=0;
+    for(var i=0;i<=n;i++){
+      var x=a+(c-a)*i/n,y=e.f(x);
+      if(!isFinite(y))continue;
+      var r=y-rxG(e,x),sg=r>1e-9?1:(r<-1e-9?-1:0);
+      if(sg!==0&&sg!==sign){if(run.length)run.push([x,y]);flush();sign=sg;}
+      run.push([x,y]);
+    }
+    flush();
+  }
+  return s;
+}
+function rxShow(){
+  var e=RX[rx.i],h='<div class="pick" role="group" aria-label="Beispiel wählen">';
+  for(var k=0;k<RX.length;k++)h+='<button type="button" class="pk'+(k===rx.i?' on':'')+'" data-pick="'+k+'" aria-pressed="'+(k===rx.i)+'">Beispiel '+(k+1)+'</button>';
+  h+='</div><div class="termbox">'+fterm(e.num,e.den)+'</div>';
+  if(e.div)h+='<details class="dd"><summary>Polynomdivision ansehen</summary><pre class="pd">'+e.div+'</pre></details>';
+  else h+='<p class="hint">Zählergrad &lt; Nennergrad: keine Polynomdivision nötig. Die Asymptote ist <i>y</i> = 0.</p>';
+  h+='<div class="termbox"><span class="tf"><i>f</i>(<i>x</i>)&nbsp;=&nbsp;<span class="hlA">'+fmt(e.gH)+'</span>&nbsp;+&nbsp;<span class="hlR">'+e.rH+'</span></span></div>';
+  h+='<p class="hint" style="margin:0 0 6px"><span class="hlA">Asymptote '+fmt(e.gT)+'</span> &nbsp; <span class="hlR">Restterm <i>R</i>(<i>x</i>)</span></p>';
+  h+='<div class="plot" id="rxPlot"></div>';
+  h+='<label class="hint" for="rxS">Stelle <i>x</i> wählen</label><input type="range" id="rxS" min="-6" max="6" step="0.05" value="'+rx.x+'">';
+  h+='<div class="btns" style="margin-top:0"><button type="button" class="btn" data-x="-5.8">ganz links</button><button type="button" class="btn" data-x="0">x = 0</button><button type="button" class="btn" data-x="5.8">ganz rechts</button></div>';
+  h+='<div class="qlist" style="margin-top:10px">';
+  h+='<div class="qrow" id="rxQp"><div class="qat">Für '+fmt('x')+' → +∞ nähert sich der Graph der Asymptote …</div><div class="opts"><button type="button" class="opt" data-q="p" data-v="o">von oben</button><button type="button" class="opt" data-q="p" data-v="u">von unten</button></div></div>';
+  h+='<div class="qrow" id="rxQn"><div class="qat">Für '+fmt('x')+' → −∞ nähert sich der Graph der Asymptote …</div><div class="opts"><button type="button" class="opt" data-q="n" data-v="o">von oben</button><button type="button" class="opt" data-q="n" data-v="u">von unten</button></div></div>';
+  h+='<div class="qrow" id="rxQs"><div class="fld" style="margin:0"><label><span class="l">Schnittpunkt mit der Asymptote bei <i>x</i> =</span><input type="text" id="rxIn" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Wert oder keiner"></label></div></div>';
+  h+='</div><div class="btns"><button type="button" class="btn primary" data-act="check">Prüfen</button></div><div id="rxFb" aria-live="polite"></div>';
+  rxBox.innerHTML=h;
+  rx.p=null;rx.n=null;rx.checked=false;
+  rxUpdate();
+}
+function rxUpdate(){
+  var e=RX[rx.i],x=rx.x,ex='',read,lab='';
+  var isPole=e.poles.some(function(p){return Math.abs(p-x)<0.04;});
+  if(isPole){read=fmt('x = '+num(x))+': Hier ist f nicht definiert (Polstelle).';}
+  else{
+    var fx=e.f(x),gx=rxG(e,x),r=fx-gx,cls=r>0.005?'seg-a':(r<-0.005?'seg-b':'');
+    if(cls)ex+='<line class="'+cls+'" x1="'+X(x)+'" y1="'+Y(gx).toFixed(1)+'" x2="'+X(x)+'" y2="'+Math.max(-50,Math.min(H+50,Y(fx))).toFixed(1)+'"/>';
+    ex+='<circle class="dota" cx="'+X(x)+'" cy="'+Y(gx).toFixed(1)+'" r="4"/><circle class="dotg" cx="'+X(x)+'" cy="'+Y(fx).toFixed(1)+'" r="4.5"/>';
+    var right=X(x)>W-130,lx=X(x)+(right?-10:10),anc=right?'end':'start';
+    var my=Math.max(26,Math.min(H-26,(Y(gx)+Math.max(-50,Math.min(H+50,Y(fx))))/2));
+    var Rt='<tspan font-style="italic">R</tspan>(<tspan font-style="italic">x</tspan>)';
+    if(cls)lab='<text class="rlbl '+(r>0?'ra':'rb')+'" x="'+lx+'" y="'+(my-3).toFixed(1)+'" text-anchor="'+anc+'">'+Rt+' ≈ '+num(r)+'</text>'+
+      '<text class="rlbl '+(r>0?'ra':'rb')+'" x="'+lx+'" y="'+(my+12).toFixed(1)+'" text-anchor="'+anc+'">Graph '+(r>0?'oberhalb':'unterhalb')+'</text>';
+    else lab='<text class="rlbl rz" x="'+lx+'" y="'+(Y(gx)-10).toFixed(1)+'" text-anchor="'+anc+'">'+Rt+' = 0: Schnittpunkt</text>';
+    read=fmt('x = '+num(x)+' · f(x) ≈ '+num(fx)+' · Asymptote: '+num(gx))+'<br>'+
+      fmt('R(x) = f(x) - '+(e.g.m||e.g.b?'g(x)':'0')+' ≈ '+num(r))+' ⇒ '+
+      (r>0.005?'<span class="above">R(x) &gt; 0: Graph liegt oberhalb der Asymptote</span>':
+       r<-0.005?'<span class="below">R(x) &lt; 0: Graph liegt unterhalb der Asymptote</span>':
+       '<b>R(x) = 0: Graph schneidet hier die Asymptote</b>');
+    read=read.replace(/R\(x\)/g,'<i>R</i>(<i>x</i>)').replace(/([^A-Za-z>])([fg])\(/g,'$1<i>$2</i>(');
+  }
+  var top='';
+  if(rx.checked)e.S.forEach(function(s){var cx=X(s),cy=Y(rxG(e,s)),d='M'+(cx-6)+' '+(cy-6).toFixed(1)+'L'+(cx+6)+' '+(cy+6).toFixed(1)+'M'+(cx-6)+' '+(cy+6).toFixed(1)+'L'+(cx+6)+' '+(cy-6).toFixed(1);
+    top+='<path class="spxb" d="'+d+'"/><path class="spx" d="'+d+'"/><text class="lbl" x="'+(cx+9)+'" y="'+(cy+16).toFixed(1)+'">S</text>';});
+  document.getElementById('rxPlot').innerHTML=plot({f:e.f,poles:e.poles,asym:e.g,asymLabel:fmt(e.gT).replace(/<\/?i>/g,''),under:rxFill(e),extra:ex,top:top+lab})+
+    '<div class="legend">'+LEG.asym+'<span class="above">▮ <span class="m"><i>R</i>(<i>x</i>) &gt; 0</span>: Graph oberhalb</span><span class="below">▮ <span class="m"><i>R</i>(<i>x</i>) &lt; 0</span>: Graph unterhalb</span></div>';
+}
+function rxCheck(){
+  var e=RX[rx.i],out='',inp=document.getElementById('rxIn'),p=parseList(inp.value.replace(/keiner|keinen|kein/i,'keine'));
+  var okP=rx.p===e.lp,okN=rx.n===e.ln,okS=p.ok&&!diff(e.S,p.vals).length&&!diff(p.vals,e.S).length;
+  document.getElementById('rxQp').className='qrow'+(rx.p===null?'':(okP?' right':' wrong'));
+  document.getElementById('rxQn').className='qrow'+(rx.n===null?'':(okN?' right':' wrong'));
+  document.getElementById('rxQs').className='qrow'+(okS?' right':' wrong');
+  inp.className=okS?'ok':'no';
+  if(rx.p===null||rx.n===null)out+=fb('info','Beantworte zuerst beide Fragen zur Annäherung.');
+  else out+=fb(okP&&okN?'good':'bad',(okP&&okN?'Annäherung richtig. ':'Annäherung noch nicht ganz richtig. ')+'Grenzwerte des Restterms:<div class="way">'+limHTML(e,1)+limHTML(e,-1)+'</div>'+fmt(e.limT).replace(/([^A-Za-z>])f\(/g,'$1<i>f</i>('));
+  out+=fb(okS?'good':'bad',(okS?'Schnittpunkt richtig. ':'Schnittpunkt noch nicht richtig. ')+fmt(e.sT).replace(/R\(x\)/g,'<i>R</i>(<i>x</i>)'));
+  document.getElementById('rxFb').innerHTML=out;
+  rx.checked=true;rxUpdate();
+}
+rxBox.addEventListener('click',function(ev){
+  var b=ev.target.closest('button');if(!b)return;
+  if(b.hasAttribute('data-pick')){rx.i=+b.getAttribute('data-pick');rx.x=RX[rx.i].x0;rxShow();return;}
+  if(b.hasAttribute('data-x')){rx.x=+b.getAttribute('data-x');document.getElementById('rxS').value=rx.x;rxUpdate();return;}
+  if(b.hasAttribute('data-q')){
+    var q=b.getAttribute('data-q'),v=b.getAttribute('data-v');rx[q]=v;
+    Array.prototype.forEach.call(b.parentNode.querySelectorAll('.opt'),function(o){o.className='opt'+(o===b?' on-sel':'');o.setAttribute('aria-pressed',o===b);o.style.borderColor=o===b?'var(--curve)':'';o.style.background=o===b?'var(--selbg)':'';});
+    return;
+  }
+  if(b.getAttribute('data-act')==='check')rxCheck();
+});
+rxBox.addEventListener('input',function(ev){if(ev.target.id==='rxS'){rx.x=+ev.target.value;rxUpdate();}});
+rxBox.addEventListener('keydown',function(ev){if(ev.key==='Enter'&&ev.target.tagName==='INPUT'&&ev.target.type==='text'){ev.preventDefault();rxCheck();}});
+rxShow();
+
+/* =========================================================
+   7  Strategien
+   ========================================================= */
+var TOOLS=[
+ ['a','Nenner = 0 setzen'],
+ ['b','Zähler = 0 setzen und Lösungen mit D abgleichen'],
+ ['c','Zähler und Nenner faktorisieren und kürzen'],
+ ['e','Exponent des Linearfaktors im gekürzten Nenner betrachten'],
+ ['f','Zählergrad und Nennergrad vergleichen'],
+ ['g','Polynomdivision durchführen'],
+ ['h','Polynomdivision, dann Vorzeichen des Restterms für x → ±∞ untersuchen (Grenzwert)'],
+ ['i','Polynomdivision, dann Restterm = 0 setzen']
+];
+var TASKS=[
+ {q:'Gib die Definitionsmenge an.',a:'a',why:'Wo der Nenner 0 wird, ist f nicht definiert.'},
+ {q:'Bestimme die Nullstellen.',a:'b',why:'Ein Bruch ist 0, wenn der Zähler 0 ist und der Nenner nicht.'},
+ {q:'Untersuche, ob eine Definitionslücke stetig behebbar ist.',a:'c',why:'Verschwindet der Faktor (x - a) beim Kürzen ganz aus dem Nenner, ist die Lücke stetig behebbar.'},
+ {q:'Entscheide, ob eine Polstelle mit oder ohne Vorzeichenwechsel vorliegt.',a:'e',why:'Ungerader Exponent: mit VZW, gerader Exponent: ohne VZW.'},
+ {q:'Gib an, welche Art von nicht-senkrechter Asymptote der Graph hat.',a:'f',why:'Zählergrad &lt; Nennergrad: y = 0. Gleich: y = c. Zählergrad = Nennergrad + 1: schräg.'},
+ {q:'Bestimme die Gleichung der schrägen Asymptote.',a:'g',why:'Der ganzrationale Teil des Ergebnisses ist die Asymptote.'},
+ {q:'Untersuche, ob sich der Graph der Asymptote von oben oder unten nähert.',a:'h',why:'Erst liefert die Polynomdivision den Restterm R(x). R(x) &gt; 0: Graph oberhalb, R(x) &lt; 0: Graph unterhalb der Asymptote.'},
+ {q:'Berechne den Schnittpunkt des Graphen mit seiner Asymptote.',a:'i',why:'Erst liefert die Polynomdivision den Restterm. Wo er 0 ist, stimmen Graph und Asymptote überein.'}
+];
+var stOrder=shuffle(TASKS.slice()),stBox=document.getElementById('stBox'),stChecked=false;
+function stRender(){
+  var h='<div class="qlist">';
+  stOrder.forEach(function(t,i){
+    h+='<div class="srow" id="st'+i+'"><div class="q">'+(i+1)+'. '+t.q+'</div><select data-i="'+i+'" aria-label="Werkzeug für Aufgabe '+(i+1)+'"><option value="">– Werkzeug wählen –</option>';
+    TOOLS.forEach(function(o){h+='<option value="'+o[0]+'">'+o[1]+'</option>';});
+    h+='</select><div class="why" hidden></div></div>';
+  });
+  h+='</div><div class="btns" style="align-items:center"><button type="button" class="btn primary" data-act="check">Prüfen</button><button type="button" class="btn" data-act="sol">Lösung</button><button type="button" class="btn" data-act="new">Neu mischen</button><span class="score" id="stScore" aria-live="polite"></span></div>';
+  stBox.innerHTML=h;
+}
+function stCheck(showSol){
+  var right=0,sel=stBox.querySelectorAll('select');
+  Array.prototype.forEach.call(sel,function(s){
+    var i=+s.getAttribute('data-i'),t=stOrder[i],row=document.getElementById('st'+i),why=row.querySelector('.why');
+    if(showSol)s.value=t.a;
+    var ok=s.value===t.a;
+    if(ok)right++;
+    row.className='srow'+(s.value?(ok?' right':' wrong'):'');
+    s.className=s.value?(ok?'ok':'no'):'';
+    if(ok){why.innerHTML=fmt(t.why).replace(/R\(x\)/g,'<i>R</i>(<i>x</i>)');why.hidden=false;}else why.hidden=true;
+  });
+  document.getElementById('stScore').textContent=right+' von '+stOrder.length+' richtig';
+}
+stBox.addEventListener('click',function(ev){
+  var b=ev.target.closest('button');if(!b)return;
+  var a=b.getAttribute('data-act');
+  if(a==='check')stCheck(false);
+  else if(a==='sol')stCheck(true);
+  else if(a==='new'){stOrder=shuffle(TASKS.slice());stRender();}
+});
+stBox.addEventListener('change',function(ev){
+  if(ev.target.tagName!=='SELECT')return;
+  var row=ev.target.parentNode;row.className='srow';ev.target.className='';row.querySelector('.why').hidden=true;
+});
+stRender();
+
+/* =========================================================
+   8  Steckbrief-Check
+   ========================================================= */
+var CK=[
+ {num:'x^3 - x',den:'x^2 - 4',gaps:[-2,2],zeros:[-1,0,1],holes:[],pm:[-2,2],po:[],sym:'P',as:'s',asym:{m:1,b:0},asymT:'y = x',
+  f:function(x){return (x*x*x-x)/(x*x-4);},plotHoles:[],poles:[-2,2],way:[
+  'Nenner: x^2 - 4 = (x - 2)(x + 2) = 0 ⇒ x = ±2, also D = \u211D \\ {−2; 2}.',
+  'Zähler: x^3 - x = x(x - 1)(x + 1) = 0 ⇒ x = 0 oder x = ±1. Alle liegen in D.',
+  'Kein gemeinsamer Faktor: keine hebbare Lücke. Beide Nennerfaktoren haben Exponent 1: Polstellen mit VZW.',
+  'D ist symmetrisch. Zähler nur ungerade, Nenner nur gerade Exponenten: punktsymmetrisch zum Ursprung.',
+  'Zählergrad 3 = Nennergrad 2 + 1: schräge Asymptote. Polynomdivision: f(x) = x + [[3x|x^2 - 4]], also y = x.']},
+ {num:'2x^2 - 2x',den:'x^2 - 2x + 1',gaps:[1],zeros:[0],holes:[],pm:[1],po:[],sym:'K',as:'c',asym:{m:0,b:2},asymT:'y = 2',
+  f:function(x){return 2*x/(x-1);},plotHoles:[],poles:[1],way:[
+  'Nenner: x^2 - 2x + 1 = (x - 1)^2 = 0 ⇒ x = 1, also D = \u211D \\ {1}.',
+  'Zähler: 2x^2 - 2x = 2x(x - 1) = 0 ⇒ x = 0 oder x = 1. x = 1 liegt nicht in D, einzige Nullstelle ist x = 0.',
+  'Gekürzt: f(x) = [[2x|x - 1]]. Der Faktor (x - 1) bleibt im Nenner: keine hebbare Lücke, sondern eine Polstelle. Nach dem Kürzen ist der Exponent 1: mit VZW.',
+  'D = \u211D \\ {1} ist nicht symmetrisch: keine Symmetrie zum Koordinatensystem.',
+  'Zählergrad 2 = Nennergrad 2: waagrechte Asymptote y = 2 : 1 = 2.']},
+ {num:'x^2 - 4',den:'x^3 + 2x^2',gaps:[-2,0],zeros:[2],holes:[-2],pm:[],po:[0],sym:'K',as:'0',asym:{m:0,b:0},asymT:'y = 0',
+  f:function(x){return (x-2)/(x*x);},plotHoles:[{x:-2,y:-1}],poles:[0],way:[
+  'Nenner: x^3 + 2x^2 = x^2(x + 2) = 0 ⇒ x = 0 oder x = −2, also D = \u211D \\ {−2; 0}.',
+  'Zähler: x^2 - 4 = (x - 2)(x + 2) = 0 ⇒ x = ±2. x = −2 liegt nicht in D, einzige Nullstelle ist x = 2.',
+  'Gekürzt: f(x) = [[x - 2|x^2]]. Der Faktor (x + 2) ist ganz weg: stetig behebbare Lücke bei x = −2, Loch bei (−2 | −1). x^2 bleibt im Nenner: Polstelle bei x = 0 ohne VZW (Exponent 2).',
+  'D = \u211D \\ {−2; 0} ist nicht symmetrisch: keine Symmetrie zum Koordinatensystem.',
+  'Zählergrad 2 &lt; Nennergrad 3: waagrechte Asymptote y = 0.']}
+];
+var CKF=[['gaps','Definitionsmenge'],['zeros','Nullstellen'],['holes','stetig behebbare Lücken bei'],['pm','Polstellen mit VZW bei'],['po','Polstellen ohne VZW bei']];
+var ckI=0,ckBox=document.getElementById('ckBox');
+function ckShow(){
+  var e=CK[ckI],h='<div class="pick" role="group" aria-label="Funktion wählen">';
+  for(var k=0;k<CK.length;k++)h+='<button type="button" class="pk'+(k===ckI?' on':'')+'" data-pick="'+k+'" aria-pressed="'+(k===ckI)+'">Funktion '+(k+1)+'</button>';
+  h+='</div><div class="termbox">'+fterm(e.num,e.den)+'</div><div class="fld">';
+  CKF.forEach(function(c){
+    var inp='<input type="text" data-f="'+c[0]+'" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="'+(c[0]==='gaps'?'z. B. -2; 3':'Werte oder keine')+'">';
+    if(c[0]==='gaps')h+='<label><span class="l">Definitionsmenge:</span><span class="dwrap"><span class="dset">D&nbsp;=&nbsp;\u211D&nbsp;\\&nbsp;{</span>'+inp+'<span class="dset">}</span></span></label>';
+    else h+='<label><span class="l">'+c[1]+': <i>x</i> =</span>'+inp+'</label>';
+  });
+  h+='<label><span class="l">Symmetrie:</span><select data-f="sym"><option value="">– wählen –</option><option value="A">achsensymmetrisch zur y-Achse</option><option value="P">punktsymmetrisch zum Ursprung</option><option value="K">keine Symmetrie zum KS</option></select></label>';
+  h+='<label><span class="l">Asymptote:</span><select data-f="as"><option value="">– wählen –</option><option value="0">waagrecht: y = 0</option><option value="c">waagrecht: y = c (c ≠ 0)</option><option value="s">schräg</option></select></label>';
+  h+='<p class="hint">Mehrere Werte mit Semikolon trennen. Gibt es keine, schreibe „keine“.</p></div>';
+  h+='<div class="btns"><button type="button" class="btn primary" data-act="check">Steckbrief prüfen</button><button type="button" class="btn" data-act="sol">Lösungsweg</button></div>';
+  h+='<div id="ckFb" aria-live="polite"></div><div id="ckWay" class="way" hidden></div><div class="plot" id="ckPlot"><div class="ph">Hier erscheint der Graph, sobald du prüfst.</div></div>';
+  ckBox.innerHTML=h;
+}
+function ckPlot(){
+  var e=CK[ckI],keys=['asym'];
+  if(e.poles.length)keys.unshift('pole');if(e.plotHoles.length)keys.push('hole');if(e.zeros.length)keys.push('zero');
+  document.getElementById('ckPlot').innerHTML=plot({f:e.f,poles:e.poles,holes:e.plotHoles,zeros:e.zeros,asym:e.asym,asymLabel:e.asymT})+legend(keys);
+}
+function ckCheck(){
+  var e=CK[ckI],right=0,total=CKF.length+2,lines=[];
+  CKF.forEach(function(c){
+    var inp=ckBox.querySelector('input[data-f="'+c[0]+'"]'),p=parseList(inp.value);
+    var ok=p.ok&&(c[0]==='gaps'||inp.value.trim()!=='')&&!diff(e[c[0]],p.vals).length&&!diff(p.vals,e[c[0]]).length;
+    inp.className=ok?'ok':'no';
+    if(ok)right++;else lines.push(c[1]);
+  });
+  ['sym','as'].forEach(function(k){
+    var s=ckBox.querySelector('select[data-f="'+k+'"]'),ok=s.value===e[k];
+    s.className=ok?'ok':'no';if(ok)right++;else lines.push(k==='sym'?'Symmetrie':'Asymptote');
+  });
+  var out=right===total?fb('good','Alle '+total+' Angaben stimmen. Stark!'):
+    fb('bad',right+' von '+total+' Angaben stimmen. Noch einmal ansehen: '+lines.join(', ')+'. Rot markierte Felder kannst du verbessern und erneut prüfen.');
+  document.getElementById('ckFb').innerHTML=out;
+  ckPlot();
+}
+ckBox.addEventListener('click',function(ev){
+  var b=ev.target.closest('button');if(!b)return;
+  if(b.hasAttribute('data-pick')){ckI=+b.getAttribute('data-pick');ckShow();return;}
+  var a=b.getAttribute('data-act');
+  if(a==='check')ckCheck();
+  else if(a==='sol'){
+    var w=document.getElementById('ckWay');
+    if(w.hidden){w.innerHTML=CK[ckI].way.map(function(s){return '<p>'+fmt(s)+'</p>';}).join('');w.hidden=false;ckPlot();}
+    else w.hidden=true;
+  }
+});
+ckBox.addEventListener('keydown',function(ev){if(ev.key==='Enter'&&ev.target.tagName==='INPUT'){ev.preventDefault();ckCheck();}});
+ckShow();
+
+})();
+</script>
+</body>
+</html>

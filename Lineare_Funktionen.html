@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Werkstatt Lineare Funktionen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500;600&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400;1,600&family=Schibsted+Grotesk:wght@600;700;800&display=swap">
+<script>
+window.MathJax = { tex: { inlineMath: [['\\(', '\\)']] }, svg: { fontCache: 'global' }, options: { enableMenu: false } };
+</script>
+<script async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js"></script>
+<style>
+/* Layout: Schulheft auf Karopapier – Stationen untereinander, ab 760px Graph links (mitlaufend) und Aufgaben rechts */
+:root{
+  --paper:#f5f7fb; --sheet:#ffffff; --plot:#ffffff; --ink:#14203a; --muted:#56617a; --line:#dce3ee;
+  --grid:#e2e8f2; --axis:#27324e;
+  --pen:#2147c7; --pen2:#0b8668; --mark:#ffd84a; --mark-ink:#8c6300;
+  --ok:#17803d; --bad:#c23a2b;
+  --f-display:"Schibsted Grotesk","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --f-math:"STIX Two Text","Cambria Math","Times New Roman",serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0e1422; --sheet:#151c2d; --plot:#10172a; --ink:#e7ecf6; --muted:#9ba6be; --line:#27314b;
+    --grid:#1f2942; --axis:#c2cbe0;
+    --pen:#7fa3ff; --pen2:#3fd0ad; --mark:#f0c73a; --mark-ink:#f0c73a;
+    --ok:#52cf82; --bad:#ff7b6b; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0e1422; --sheet:#151c2d; --plot:#10172a; --ink:#e7ecf6; --muted:#9ba6be; --line:#27314b;
+  --grid:#1f2942; --axis:#c2cbe0;
+  --pen:#7fa3ff; --pen2:#3fd0ad; --mark:#f0c73a; --mark-ink:#f0c73a;
+  --ok:#52cf82; --bad:#ff7b6b; color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.55;-webkit-text-size-adjust:100%}
+body.lb-open{overflow:hidden}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:clamp(16px,4vw,40px)}
+
+/* Kopf */
+.top{padding-block:2.8rem 1.8rem}
+.kicker{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(2.3rem,6.4vw,3.8rem);line-height:1;letter-spacing:-.025em;margin:.5rem 0 .9rem;text-wrap:balance}
+h1 .slope{display:inline-block;color:var(--pen);font-family:var(--f-math);font-style:italic;font-weight:600;letter-spacing:0;font-size:.62em;vertical-align:.18em;margin-left:.25em}
+.intro{max-width:62ch;color:var(--muted);margin:0}
+.overall{display:flex;align-items:center;gap:.9rem;margin-top:1.4rem;font-family:var(--f-mono);font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{flex:0 1 280px;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--ok);transition:width .4s ease}
+
+/* Stationsleiste */
+.stations{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--paper);border-block:1px solid var(--line)}
+.nav-in{display:flex;gap:.45rem;overflow-x:auto;padding-block:.6rem;scrollbar-width:thin}
+.stations a{flex:none;display:flex;align-items:center;gap:.5rem;text-decoration:none;color:var(--ink);font-size:.85rem;border:1px solid var(--line);background:var(--sheet);border-radius:999px;padding:.28rem .75rem .28rem .3rem}
+.stations a:hover{border-color:var(--pen)}
+.stations a:focus-visible{outline:2px solid var(--pen);outline-offset:2px}
+.stations .n{font-family:var(--f-mono);font-size:.72rem;width:1.55rem;height:1.55rem;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line);background:var(--paper)}
+.stations .c{font-family:var(--f-mono);font-size:.7rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.stations a.done .n{background:var(--ok);border-color:var(--ok);color:var(--sheet)}
+
+/* Stationen */
+.station{padding-block:3.2rem 1.4rem;border-bottom:1px solid var(--line)}
+.st-head{display:grid;gap:.35rem;margin-bottom:1.3rem;max-width:68ch}
+.st-num{font-family:var(--f-mono);font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;color:var(--pen);display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+h2{font-family:var(--f-display);font-weight:700;font-size:clamp(1.55rem,3.6vw,2.1rem);line-height:1.12;letter-spacing:-.015em;margin:0;text-wrap:balance}
+h3{font-family:var(--f-display);font-weight:700;font-size:1.2rem;margin:0;text-wrap:balance}
+.st-head p{margin:.2rem 0 0;color:var(--muted)}
+.merke{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.2rem 1rem;align-items:baseline;max-width:72ch;margin:0 0 1.6rem;padding:.8rem 1rem;border:1.5px dashed var(--line);border-radius:12px;background:var(--sheet)}
+.merke-k{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--pen);font-weight:600}
+.merke p{margin:0}
+
+.card{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:1rem;display:grid;gap:.85rem;min-width:0;align-content:start}
+.card-k{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;align-items:start}
+@media (max-width:680px){.grid-2{grid-template-columns:minmax(0,1fr)}}
+.list{display:grid;gap:1rem}
+.task2{grid-template-columns:minmax(0,360px) minmax(0,1fr);gap:1.4rem;align-items:start}
+@media (max-width:720px){.task2{grid-template-columns:minmax(0,1fr)}}
+.duo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:1.6rem;align-items:start}
+.duo .sticky{position:sticky;top:calc(env(safe-area-inset-top,0px) + 74px);display:grid;gap:.6rem}
+@media (max-width:780px){.duo{grid-template-columns:minmax(0,1fr)}.duo .sticky{position:static}}
+.stack{display:grid;gap:1rem;min-width:0}
+.q{margin:0;font-size:1.02rem}
+.q-k{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);letter-spacing:.08em;margin-right:.45rem}
+.caption{font-size:.85rem;color:var(--muted);margin:0}
+
+/* Graph */
+.fig{position:relative;margin:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--plot);max-width:100%}
+.fig > svg.cs{display:block;width:100%;height:auto;cursor:zoom-in}
+.fig.narrow{max-width:420px}
+.zoom{position:absolute;right:7px;bottom:7px;width:34px;height:34px;padding:0;border-radius:8px;border:1px solid var(--line);background:var(--sheet);color:var(--muted);display:grid;place-items:center;cursor:zoom-in}
+.zoom:hover{color:var(--ink);border-color:var(--axis)}
+.zoom:focus-visible{outline:2px solid var(--pen);outline-offset:2px}
+.zoom svg{width:16px;height:16px}
+
+.cs .bg{fill:var(--plot)}
+.cs .gl{stroke:var(--grid);stroke-width:1;fill:none}
+.cs .ax{stroke:var(--axis);stroke-width:1.5;fill:none}
+.cs .arr{fill:var(--axis)}
+.cs .tk{stroke:var(--axis);stroke-width:1.3}
+.cs text{font-family:var(--f-math);fill:var(--ink);paint-order:stroke;stroke:var(--plot);stroke-width:4px;stroke-linejoin:round}
+.cs .tl{font-size:11px;fill:var(--muted)}
+.cs .an{font-size:16px;font-style:italic}
+.cs .at{font-size:11px;font-family:var(--f-body);fill:var(--muted)}
+.cs .ln{fill:none;stroke-width:2.7;stroke-linecap:round;stroke-linejoin:round}
+.cs .ln.c1{stroke:var(--pen)} .cs .ln.c2{stroke:var(--pen2)}
+.cs .ghost{fill:none;stroke:var(--bad);stroke-width:2.2;stroke-dasharray:8 6;stroke-linecap:round}
+.cs .lab{font-size:17px;font-style:italic;font-weight:600}
+.cs .lab.c1{fill:var(--pen)} .cs .lab.c2{fill:var(--pen2)}
+.cs .dash{fill:none;stroke-width:1.5;stroke-dasharray:4 4}
+.cs .dash.c1{stroke:var(--pen)} .cs .dash.c2{stroke:var(--pen2)} .cs .dash.cm{stroke:var(--mark-ink)} .cs .dash.ci{stroke:var(--ink)}
+.cs .pt{stroke:var(--plot);stroke-width:2}
+.cs .pt.c1{fill:var(--pen)} .cs .pt.c2{fill:var(--pen2)} .cs .pt.ci{fill:var(--ink)} .cs .pt.cb{fill:var(--bad)}
+.cs .pt.open{fill:var(--plot);stroke-width:2.4}
+.cs .pt.open.cb{stroke:var(--bad)} .cs .pt.open.c1{stroke:var(--pen)}
+.cs .val{font-size:13px}
+.cs .val.c1{fill:var(--pen)} .cs .val.c2{fill:var(--pen2)} .cs .val.cb{fill:var(--bad)} .cs .val.ci{fill:var(--ink)} .cs .val.cm{fill:var(--mark-ink)}
+.cs .hl{fill:none;stroke:var(--mark);stroke-width:11;stroke-linecap:round;opacity:.6}
+.cs .tri{fill:var(--mark);fill-opacity:.32;stroke:none}
+.cs .tri-l{fill:none;stroke:var(--mark-ink);stroke-width:1.7;stroke-dasharray:5 3}
+.cs .tri-t{font-size:12.5px;fill:var(--mark-ink)}
+.cs .ra{fill:none;stroke:var(--ink);stroke-width:1.4}
+.cs .band{stroke:var(--mark);stroke-width:10;opacity:.8}
+.cs .end{stroke:var(--mark-ink);stroke-width:2.2}
+.cs .end.open{fill:var(--plot)} .cs .end.closed{fill:var(--mark-ink)}
+
+/* Antworten */
+.opts{display:grid;gap:.5rem}
+.opts.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:520px){.opts.cols-2{grid-template-columns:minmax(0,1fr)}}
+.opt{display:flex;align-items:center;gap:.65rem;padding:.6rem .8rem;border:1.5px solid var(--line);border-radius:10px;background:var(--sheet);cursor:pointer;min-width:0;transition:border-color .15s,background-color .15s}
+.opt:hover{border-color:var(--axis)}
+.opt input{accent-color:var(--pen);margin:0;flex:none;width:1.05rem;height:1.05rem}
+.opt:has(input:checked){border-color:var(--pen)}
+.opt:has(input:focus-visible){outline:2px solid var(--pen);outline-offset:2px}
+.opt-t{min-width:0;overflow-wrap:anywhere}
+.opt.is-ok{border-color:var(--ok);background:var(--sheet);background:color-mix(in srgb,var(--ok) 8%,var(--sheet))}
+.opt.is-bad{border-color:var(--bad);background:var(--sheet);background:color-mix(in srgb,var(--bad) 7%,var(--sheet))}
+.actions{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+button{font:inherit}
+.check{background:var(--ink);color:var(--sheet);border:none;border-radius:9px;padding:.55rem 1.15rem;font-weight:700;cursor:pointer;font-size:.95rem}
+.check:hover{opacity:.88}
+.check:focus-visible,.choice:focus-visible{outline:2px solid var(--pen);outline-offset:2px}
+.choice{background:var(--sheet);color:var(--ink);border:1.5px solid var(--line);border-radius:9px;padding:.5rem 1rem;cursor:pointer;font-size:.95rem;font-weight:700}
+.choice:hover{border-color:var(--axis)}
+.choice.is-ok{border-color:var(--ok);color:var(--ok);background:var(--sheet);background:color-mix(in srgb,var(--ok) 8%,var(--sheet))}
+.choice.is-bad{border-color:var(--bad);color:var(--bad);background:var(--sheet);background:color-mix(in srgb,var(--bad) 7%,var(--sheet))}
+
+.fb{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.65rem;align-items:start;padding:.75rem .9rem;border-radius:10px;border:1px solid var(--line);font-size:.95rem;line-height:1.55;background:var(--sheet)}
+.fb.ok{background:color-mix(in srgb,var(--ok) 8%,var(--sheet));border-color:color-mix(in srgb,var(--ok) 38%,var(--sheet))}
+.fb.bad{background:color-mix(in srgb,var(--bad) 7%,var(--sheet));border-color:color-mix(in srgb,var(--bad) 38%,var(--sheet))}
+.fb.info{grid-template-columns:minmax(0,1fr);color:var(--muted);background:var(--paper)}
+.fb-i{width:1.5rem;height:1.5rem;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.85rem;color:var(--sheet)}
+.fb.ok .fb-i{background:var(--ok)} .fb.bad .fb-i{background:var(--bad)}
+.fb-t{min-width:0;overflow-wrap:break-word}
+.fb.ok strong{color:var(--ok)} .fb.bad strong{color:var(--bad)}
+.mini{border-collapse:collapse;margin-top:.55rem;font-variant-numeric:tabular-nums;font-size:.9rem}
+.mini th,.mini td{padding:.25rem .7rem;border-bottom:1px solid var(--line);text-align:right}
+.mini th{font-weight:700;color:var(--muted)}
+.mini tr.eq td{font-weight:700}
+.mini tr.win td{color:var(--ok);font-weight:700}
+
+/* Aussagen */
+.stmt{background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:.85rem 1rem;display:grid;gap:.65rem}
+.stmt-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.6rem}
+.stmt-t{flex:1 1 220px;min-width:0;font-size:1.05rem}
+.terms{display:flex;flex-wrap:wrap;gap:.4rem 1.6rem;font-size:1.08rem}
+.given{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:1rem 1.1rem;display:grid;gap:.6rem;max-width:72ch;margin-bottom:1.5rem}
+.given p{margin:0}
+
+/* Erkunden */
+.explore{margin-top:2rem;border:1.5px dashed var(--line);border-radius:16px;padding:1.2rem;display:grid;gap:1rem;background:var(--sheet)}
+.explore > p{margin:0;color:var(--muted);max-width:66ch}
+.ctrls{display:grid;gap:1rem;align-content:start;min-width:0}
+.ctrl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.3rem .8rem;align-items:baseline}
+.ctrl label{font-weight:700}
+.ctrl output{font-family:var(--f-mono);font-variant-numeric:tabular-nums;color:var(--pen2);font-weight:600}
+.ctrl input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--pen2)}
+.readout{display:grid;gap:.5rem;margin:0}
+.readout div{display:grid;grid-template-columns:minmax(0,11rem) minmax(0,1fr);gap:.6rem;padding:.5rem 0;border-top:1px solid var(--line)}
+.readout dt{color:var(--muted);font-size:.9rem}
+.readout dd{margin:0;font-weight:700;font-variant-numeric:tabular-nums}
+@media (max-width:420px){.readout div{grid-template-columns:minmax(0,1fr)}}
+.m{font-family:var(--f-math);font-size:1.1em;font-weight:400}
+.m i{font-style:italic}
+
+.fb-line{display:block;margin-top:.35rem}
+.kbd{font-family:var(--f-mono);font-size:.88em;padding:.05rem .35rem;border:1px solid var(--line);border-radius:5px;background:var(--paper);white-space:nowrap}
+.term-rows{display:grid;gap:.6rem}
+.term-row{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
+.term-l{min-width:4.4rem;font-size:1.05rem}
+.term-in{flex:1 1 10rem;min-width:0;max-width:17rem;font-family:var(--f-mono);font-size:1rem;padding:.5rem .7rem;border:1.5px solid var(--line);border-radius:9px;background:var(--plot);color:var(--ink)}
+.term-in:focus-visible{outline:2px solid var(--pen);outline-offset:1px;border-color:var(--pen)}
+.term-in.is-ok{border-color:var(--ok)} .term-in.is-bad{border-color:var(--bad)}
+.placeholder{display:grid;place-items:center;text-align:center;min-height:13rem;padding:1.5rem;border:1.5px dashed var(--line);border-radius:10px;color:var(--muted);background:var(--sheet)}
+.placeholder p{margin:0;max-width:30ch}
+
+footer{padding-block:2rem 3rem;color:var(--muted);font-size:.85rem}
+
+/* Vergrößerung */
+.lb{position:fixed;inset:0;z-index:100;background:rgba(8,12,22,.74);display:grid;place-items:center;align-content:center;gap:.8rem;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px);cursor:zoom-out}
+.lb-frame{background:var(--plot);border-radius:12px;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.4);max-width:100%}
+.lb-frame svg{display:block;width:100%;height:auto;pointer-events:none}
+.lb-hint{margin:0;color:#e7ecf6;font-family:var(--f-mono);font-size:.78rem;letter-spacing:.04em}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="kicker">Mathematik · Werkstatt</div>
+    <h1>Lineare Funktionen <span class="slope">f(x) = mx + t</span></h1>
+    <p class="intro">Sieben Stationen vom Funktionsbegriff bis zum Tarifvergleich. Jede Antwort wird sofort geprüft und begründet. In allen Koordinatensystemen der Stationen 1 bis 5 entsprechen 2 Kästchen einer Längeneinheit. Tippe einen Graphen an, um ihn zu vergrößern.</p>
+    <div class="overall"><span id="overallTxt">0 von 0 Aufgaben gelöst</span><span class="bar" aria-hidden="true"><i id="overallBar"></i></span></div>
+  </div>
+</header>
+
+<nav class="stations" aria-label="Stationen">
+  <div class="wrap nav-in">
+    <a href="#s1" data-st="1"><span class="n">1</span>Funktion?<span class="c"></span></a>
+    <a href="#s2" data-st="2"><span class="n">2</span>Term ablesen<span class="c"></span></a>
+    <a href="#s3" data-st="3"><span class="n">3</span>Parallel · orthogonal<span class="c"></span></a>
+    <a href="#s4" data-st="4"><span class="n">4</span>Schreibweisen<span class="c"></span></a>
+    <a href="#s5" data-st="5"><span class="n">5</span>Schnittpunkt · Ungleichung<span class="c"></span></a>
+    <a href="#s6" data-st="6"><span class="n">6</span>Sachzusammenhänge<span class="c"></span></a>
+    <a href="#s7" data-st="7"><span class="n">7</span>Tarife vergleichen<span class="c"></span></a>
+  </div>
+</nav>
+
+<main>
+<section class="station" id="s1">
+  <div class="wrap">
+    <div class="st-head">
+      <div class="st-num">Station 1</div>
+      <h2>Funktion oder keine Funktion?</h2>
+      <p>Entscheide für jeden Graphen, ob eine Funktion vorliegt.</p>
+    </div>
+    <aside class="merke"><span class="merke-k">Merke</span><p>Eine Zuordnung ist eine Funktion, wenn jedem x-Wert eindeutig ein y-Wert zugeordnet wird.</p></aside>
+    <div class="grid-2" id="s1-grid"></div>
+  </div>
+</section>
+
+<section class="station" id="s2">
+  <div class="wrap">
+    <div class="st-head">
+      <div class="st-num">Station 2</div>
+      <h2>Funktionsterm am Graphen ablesen</h2>
+      <p>Lies die Steigung \(m\) und den y-Achsenabschnitt \(t\) am Graphen \(G_f\) ab und wähle den passenden Term.</p>
+    </div>
+    <aside class="merke"><span class="merke-k">Merke</span><p>Eine lineare Funktion hat den Term \(f(x)=mx+t\). Die Steigung ist \(m=\frac{\Delta y}{\Delta x}\), und \(t\) gibt an, wo \(G_f\) die y-Achse schneidet.</p></aside>
+    <div class="list" id="s2-list"></div>
+  </div>
+</section>
+
+<section class="station" id="s3">
+  <div class="wrap">
+    <div class="st-head">
+      <div class="st-num">Station 3</div>
+      <h2>Parallel oder orthogonal?</h2>
+      <p>Entscheide nur anhand der Funktionsterme. Nach dem Prüfen siehst du beide Graphen.</p>
+    </div>
+    <aside class="merke"><span class="merke-k">Merke</span><p>Zwei Geraden sind parallel, wenn \(m_1=m_2\) gilt. Sie stehen orthogonal (senkrecht) aufeinander, wenn \(m_1\cdot m_2=-1\) gilt.</p></aside>
+    <div class="grid-2" id="s3-grid"></div>
+  </div>
+</section>
+
+<section class="station" id="s4">
+  <div class="wrap">
+    <div class="st-head">
+      <div class="st-num">Station 4</div>
+      <h2>Aussagen über zwei Funktionen</h2>
+      <p>Gegeben sind \(f(x)=x-1\) und \(g(x)=-\tfrac12x+2\). Entscheide, ob die Aussagen wahr oder falsch sind.</p>
+    </div>
+    <aside class="merke"><span class="merke-k">Merke</span><p>\(f(-1)=4\) bedeutet: Dem x-Wert \(-1\) wird der y-Wert \(4\) zugeordnet. Der Punkt \((-1\,|\,4)\) liegt auf \(G_f\).</p></aside>
+    <div class="duo">
+      <div class="sticky" id="s4-fig"></div>
+      <div class="stack" id="s4-list"></div>
+    </div>
+  </div>
+</section>
+
+<section class="station" id="s5">
+  <div class="wrap">
+    <div class="st-head">
+      <div class="st-num">Station 5</div>
+      <h2>Schnittpunkt und Ungleichungen am Graphen</h2>
+      <p>Gegeben sind \(f(x)=\tfrac12x+1\) und \(g(x)=-x+4\). Beantworte die Fragen mithilfe der Graphen und der Terme.</p>
+    </div>
+    <aside class="merke"><span class="merke-k">Merke</span><p>Den Schnittpunkt zweier Geraden erhältst du, indem du die Terme gleichsetzt. Eine Ungleichung wie \(f(x)\gt g(x)\) gilt für alle x-Werte, an denen \(G_f\) oberhalb von \(G_g\) verläuft.</p></aside>
+    <div class="duo">
+      <div class="sticky" id="s5-fig"></div>
+      <div class="stack" id="s5-list"></div>
+    </div>
+  </div>
+</section>
+
+<section class="station" id="s6">
+  <div class="wrap">
+    <div class="st-head">
+      <div class="st-num">Station 6</div>
+      <h2>Funktionsgleichungen im Sachzusammenhang</h2>
+      <p>Wähle die passende Funktionsgleichung. Bei Zeitvorgängen steht \(t\) für die Zeit.</p>
+    </div>
+    <aside class="merke"><span class="merke-k">Merke</span><p>Im Sachzusammenhang ist die Steigung die Änderung pro Einheit (zum Beispiel pro Minute oder pro Meter), der y-Achsenabschnitt ist der Anfangswert.</p></aside>
+    <div class="grid-2" id="s6-grid"></div>
+  </div>
+</section>
+
+<section class="station" id="s7">
+  <div class="wrap">
+    <div class="st-head">
+      <div class="st-num">Station 7</div>
+      <h2>Tarife vergleichen: Einzeleintritt oder Mitgliedschaft?</h2>
+      <p>Eine Anwendungsaufgabe, in der Schnittpunkt und Ungleichung zusammenkommen.</p>
+    </div>
+    <div class="given">
+      <p>In einer Kletterhalle kostet der <strong>Einzeleintritt</strong> 12 € pro Besuch. Alternativ kann ein Besucher auch <strong>Mitglied</strong> werden für eine einmalige Aufnahmegebühr von 60 €. Dafür zahlt er dann nur 7 € pro Besuch.</p>
+      <p>\(x\) ist die Anzahl der Besuche. \(E(x)\) gibt die Kosten in € beim Einzeleintritt an, \(M(x)\) die Kosten in € mit Mitgliedschaft.</p>
+    </div>
+    <div class="duo">
+      <div class="sticky" id="s7-fig"></div>
+      <div class="stack" id="s7-list"></div>
+    </div>
+    <div class="explore" id="s7-explore" hidden>
+      <h3>Erkunden: Was passiert, wenn sich die Preise ändern?</h3>
+      <p>Verändere die Aufnahmegebühr und den Preis pro Besuch für Mitglieder. Beobachte, wie sich <span class="m"><i>G</i><sub><i>M</i></sub></span> und der Schnittpunkt bewegen.</p>
+      <div class="duo">
+        <div id="s7-fig2"></div>
+        <div class="ctrls">
+          <div class="ctrl"><label for="fee">Aufnahmegebühr</label><output id="feeOut" for="fee">60 €</output><input type="range" id="fee" min="0" max="120" step="10" value="60"></div>
+          <div class="ctrl"><label for="rate">Preis pro Besuch für Mitglieder</label><output id="rateOut" for="rate">7 €</output><input type="range" id="rate" min="4" max="11" step="1" value="7"></div>
+          <dl class="readout">
+            <div><dt>Funktionsterm</dt><dd id="termOut"></dd></div>
+            <div><dt>Gleich teuer</dt><dd id="eqOut"></dd></div>
+            <div><dt>Mitgliedschaft günstiger</dt><dd id="winOut"></dd></div>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap">Werkstatt Lineare Funktionen · Die Graphen lassen sich durch Antippen vergrößern und durch erneutes Antippen wieder schließen.</div></footer>
+
+<div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Vergrößerter Graph" tabindex="-1">
+  <div class="lb-frame" id="lbFrame"></div>
+  <p class="lb-hint">Zum Schließen antippen oder Esc drücken</p>
+</div>
+
+<script>
+(function(){
+'use strict';
+var NS = 'http://www.w3.org/2000/svg';
+
+/* ---------- Hilfsfunktionen ---------- */
+function S(tag, a, p){ var e = document.createElementNS(NS, tag); if(a) for(var k in a) e.setAttribute(k, a[k]); if(p) p.appendChild(e); return e; }
+function H(tag, cls, html){ var e = document.createElement(tag); if(cls) e.className = cls; if(html != null) e.innerHTML = html; return e; }
+function near(a, b){ return Math.abs(a - b) < 1e-6; }
+function num(n){ var r = Math.round(n * 100) / 100; if(Math.abs(r) < 1e-9) r = 0; var s = String(Math.abs(r)).replace('.', ','); return (r < 0 ? '−' : '') + s; }
+var mjTries = 0;
+function typeset(el){
+  var mj = window.MathJax;
+  if(mj && mj.startup && mj.startup.promise && mj.typesetPromise){
+    mj.startup.promise.then(function(){ return mj.typesetPromise(el ? [el] : undefined); }).catch(function(){});
+  } else if(mjTries++ < 60){ setTimeout(function(){ typeset(el); }, 250); }
+}
+function termTex(n, mT, tT, v){
+  v = v || 'x';
+  var mm = mT === '1' ? '' : (mT === '-1' ? '-' : mT);
+  var tt = tT === '0' ? '' : (tT.charAt(0) === '-' ? tT : '+' + tT);
+  return n + '(' + v + ')=' + mm + v + tt;
+}
+
+/* ---------- Fortschritt ---------- */
+var prog = {};
+function reg(st){ if(!prog[st]) prog[st] = { total: 0, solved: {} }; prog[st].total++; }
+function solve(st, id){ prog[st].solved[id] = true; updateProgress(); }
+function updateProgress(){
+  var T = 0, D = 0;
+  Object.keys(prog).forEach(function(st){
+    var p = prog[st], d = Object.keys(p.solved).length;
+    T += p.total; D += d;
+    var a = document.querySelector('.stations a[data-st="' + st + '"]');
+    if(a){ a.querySelector('.c').textContent = d + '/' + p.total; a.classList.toggle('done', d === p.total); }
+  });
+  document.getElementById('overallTxt').textContent = D + ' von ' + T + ' Aufgaben gelöst';
+  document.getElementById('overallBar').style.width = (T ? 100 * D / T : 0) + '%';
+}
+
+/* ---------- Vergrößerung ---------- */
+var lb = document.getElementById('lb'), lbFrame = document.getElementById('lbFrame');
+function openLB(cs){
+  while(lbFrame.firstChild) lbFrame.removeChild(lbFrame.firstChild);
+  lbFrame.appendChild(cs.svg.cloneNode(true));
+  lbFrame.style.width = 'min(94vw, calc(80vh * ' + (cs.W / cs.H).toFixed(4) + '))';
+  lb.hidden = false; document.body.classList.add('lb-open');
+  try { lb.focus(); } catch(e){}
+}
+function closeLB(){
+  if(lb.hidden) return;
+  lb.hidden = true; document.body.classList.remove('lb-open');
+  while(lbFrame.firstChild) lbFrame.removeChild(lbFrame.firstChild);
+}
+lb.addEventListener('click', closeLB);
+document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeLB(); });
+
+/* ---------- Koordinatensystem ---------- */
+function makeCS(o){
+  var c = { xmin:-5.5, xmax:5.5, ymin:-5.5, ymax:5.5, sx:28, sy:28, gx:0.5, gy:0.5, tx:1, ty:1, lx:1, ly:1, origin:false, xName:'x', yName:'y', xTitle:'', yTitle:'', xTitleBelow:false, aria:'Koordinatensystem' };
+  for(var k in o) c[k] = o[k];
+  var W = (c.xmax - c.xmin) * c.sx, Hh = (c.ymax - c.ymin) * c.sy;
+  function X(x){ return (x - c.xmin) * c.sx; }
+  function Y(y){ return (c.ymax - y) * c.sy; }
+  var X0 = X(0), Y0 = Y(0);
+  var svg = S('svg', { viewBox: '0 0 ' + W.toFixed(1) + ' ' + Hh.toFixed(1), class: 'cs', role: 'img', 'aria-label': c.aria });
+  S('rect', { x:0, y:0, width:W, height:Hh, class:'bg' }, svg);
+  var L = { grid:S('g',null,svg), fill:S('g',null,svg), axes:S('g',null,svg), plot:S('g',null,svg), over:S('g',null,svg), lab:S('g',null,svg) };
+  var i, v;
+  for(i = Math.ceil(c.xmin / c.gx - 1e-9); i * c.gx <= c.xmax + 1e-9; i++){ v = X(i * c.gx); S('line', { x1:v, y1:0, x2:v, y2:Hh, class:'gl' }, L.grid); }
+  for(i = Math.ceil(c.ymin / c.gy - 1e-9); i * c.gy <= c.ymax + 1e-9; i++){ v = Y(i * c.gy); S('line', { x1:0, y1:v, x2:W, y2:v, class:'gl' }, L.grid); }
+
+  function text(x, y, str, cls, anchor, layer){
+    var t = S('text', { x:x, y:y, class:cls, 'text-anchor':anchor || 'start' }, layer || L.over);
+    String(str).split(/([A-Za-z]+)/).forEach(function(part, idx){
+      if(!part) return;
+      var sp = S('tspan', idx % 2 ? { 'font-style':'italic' } : null, t);
+      sp.textContent = part;
+    });
+    return t;
+  }
+
+  S('line', { x1:0, y1:Y0, x2:W - 3, y2:Y0, class:'ax' }, L.axes);
+  S('path', { d:'M' + (W - 1) + ',' + Y0 + ' l-11,-4.6 v9.2 z', class:'arr' }, L.axes);
+  S('line', { x1:X0, y1:Hh, x2:X0, y2:3, class:'ax' }, L.axes);
+  S('path', { d:'M' + X0 + ',1 l-4.6,11 h9.2 z', class:'arr' }, L.axes);
+  for(i = Math.ceil(c.xmin / c.tx - 1e-9); i * c.tx <= c.xmax + 1e-9; i++){
+    v = i * c.tx; if(near(v, 0)) continue; var px = X(v);
+    if(px > W - 16 || px < 6) continue;
+    S('line', { x1:px, y1:Y0 - 3.5, x2:px, y2:Y0 + 3.5, class:'tk' }, L.axes);
+    if(near(v / c.lx, Math.round(v / c.lx))) text(px, Y0 + 15, num(v), 'tl', 'middle', L.axes);
+  }
+  for(i = Math.ceil(c.ymin / c.ty - 1e-9); i * c.ty <= c.ymax + 1e-9; i++){
+    v = i * c.ty; if(near(v, 0)) continue; var py = Y(v);
+    if(py < 18 || py > Hh - 6) continue;
+    S('line', { x1:X0 - 3.5, y1:py, x2:X0 + 3.5, y2:py, class:'tk' }, L.axes);
+    if(near(v / c.ly, Math.round(v / c.ly))) text(X0 - 7, py + 4, num(v), 'tl', 'end', L.axes);
+  }
+  if(c.origin) text(X0 - 7, Y0 + 15, '0', 'tl', 'end', L.axes);
+  text(W - 7, Y0 - 10, c.xName, 'an', 'end', L.axes);
+  text(X0 + 10, 15, c.yName, 'an', 'start', L.axes);
+  if(c.xTitle){ var xt = S('text', { x:c.xTitleBelow ? W - 46 : W - 24, y:c.xTitleBelow ? Y0 + 29 : Y0 - 11, class:'at', 'text-anchor':'end' }, L.axes); xt.textContent = c.xTitle; }
+  if(c.yTitle){ var yt = S('text', { x:X0 + 24, y:14, class:'at' }, L.axes); yt.textContent = c.yTitle; }
+
+  var cs = { svg:svg, c:c, L:L, X:X, Y:Y, W:W, H:Hh, lines:[], labs:[] };
+  cs.text = text;
+  cs.clip = function(m, b, a, z){
+    a = a == null ? c.xmin : Math.max(a, c.xmin);
+    z = z == null ? c.xmax : Math.min(z, c.xmax);
+    if(m !== 0){ var p = (c.ymin - b) / m, q = (c.ymax - b) / m; if(p > q){ var tmp = p; p = q; q = tmp; } a = Math.max(a, p); z = Math.min(z, q); }
+    else if(b < c.ymin || b > c.ymax) return null;
+    return z - a > 1e-9 ? [a, z] : null;
+  };
+  cs.line = function(m, b, cls, opt){
+    opt = opt || {};
+    var r = cs.clip(m, b, opt.from, opt.to); if(!r) return null;
+    var layer = opt.layer || L.plot;
+    if(layer === L.plot) cs.lines.push({ m:m, b:b });
+    return S('line', { x1:X(r[0]), y1:Y(m * r[0] + b), x2:X(r[1]), y2:Y(m * r[1] + b), class:cls }, layer);
+  };
+  function distPx(o, px, py){
+    var ax = X(0), ay = Y(o.b), vx = c.sx, vy = -o.m * c.sy;
+    return Math.abs(vx * (py - ay) - vy * (px - ax)) / Math.hypot(vx, vy);
+  }
+  cs.name = function(m, b, base, sub, color, a, z){
+    var r = cs.clip(m, b, a, z); if(!r) return;
+    var p0x = X(r[0]), p0y = Y(m * r[0] + b), p1x = X(r[1]), p1y = Y(m * r[1] + b);
+    var dx = p1x - p0x, dy = p1y - p0y, len = Math.hypot(dx, dy), nx = -dy / len, ny = dx / len;
+    var best = null;
+    [0.88, 0.8, 0.72, 0.64, 0.36, 0.28, 0.2, 0.12].forEach(function(t){
+      [1, -1].forEach(function(s){
+        var px = p0x + t * dx + s * 19 * nx, py = p0y + t * dy + s * 19 * ny;
+        var edge = Math.min(px - 14, W - 14 - px, py - 16, Hh - 16 - py);
+        if(edge < 0) return;
+        var d = Math.min(edge + 14, 60);
+        if(c.xmin < 0 && c.xmax > 0) d = Math.min(d, Math.abs(px - X0) - (px < X0 ? 18 : 6));
+        if(c.ymin < 0 && c.ymax > 0) d = Math.min(d, Math.abs(py - Y0) - (py > Y0 ? 18 : 6));
+        cs.lines.forEach(function(o){ if(o.m === m && o.b === b) return; d = Math.min(d, distPx(o, px, py)); });
+        cs.labs.forEach(function(q){ d = Math.min(d, Math.hypot(q[0] - px, q[1] - py) - 14); });
+        var score = Math.min(d, 26) + t * 2;
+        if(!best || score > best.s) best = { px:px, py:py, s:score };
+      });
+    });
+    if(!best) return;
+    cs.labs.push([best.px, best.py]);
+    var tx = S('text', { x:best.px.toFixed(1), y:best.py.toFixed(1), 'text-anchor':'middle', 'dominant-baseline':'central', class:'lab ' + color }, L.lab);
+    tx.appendChild(document.createTextNode(base));
+    var sp = S('tspan', { dy:'0.36em', 'font-size':'72%' }, tx); sp.textContent = sub;
+  };
+  cs.pt = function(x, y, color, open){ return S('circle', { cx:X(x), cy:Y(y), r:open ? 5 : 4.6, class:'pt ' + color + (open ? ' open' : '') }, L.over); };
+  cs.dash = function(x, y, color){
+    if(!near(y, 0)) S('line', { x1:X(x), y1:Y0, x2:X(x), y2:Y(y), class:'dash ' + color }, L.over);
+    if(!near(x, 0) && !near(y, 0)) S('line', { x1:X0, y1:Y(y), x2:X(x), y2:Y(y), class:'dash ' + color }, L.over);
+  };
+  cs.val = function(x, y, str, color, o){
+    o = o || {};
+    var dx = o.dx != null ? o.dx : 10, dy = o.dy != null ? o.dy : -10, anchor = o.anchor || 'start';
+    var px = X(x) + dx, py = Y(y) + dy, w = str.length * 6.6;
+    if(anchor === 'start' && px + w > W - 4){ px = X(x) - Math.abs(dx); anchor = 'end'; }
+    if(anchor === 'end' && px - w < 4){ px = X(x) + Math.abs(dx); anchor = 'start'; }
+    if(py < 16) py = Y(y) + 20;
+    var lx0 = anchor === 'start' ? px : (anchor === 'end' ? px - w : px - w / 2);
+    for(var q = 0; q <= w; q += 10) cs.labs.push([lx0 + q, py - 4]);
+    return text(px, py, str, 'val ' + color, anchor);
+  };
+  cs.hl = function(m, b, a, z){ return cs.line(m, b, 'hl', { from:a, to:z, layer:L.fill }); };
+  cs.band = function(a, z, ea, ez){
+    var x1 = a == null ? 0 : X(a), x2 = z == null ? W : X(z);
+    S('line', { x1:x1, y1:Y0, x2:x2, y2:Y0, class:'band' }, L.fill);
+    if(a != null && ea) S('circle', { cx:X(a), cy:Y0, r:5.2, class:'end ' + ea }, L.over);
+    if(z != null && ez) S('circle', { cx:X(z), cy:Y0, r:5.2, class:'end ' + ez }, L.over);
+  };
+  cs.tri = function(m, b, x0, run, xn, yn){
+    xn = xn || 'x'; yn = yn || 'y';
+    var y0 = m * x0 + b, y1 = m * (x0 + run) + b;
+    var ax = X(x0), ay = Y(y0), bx = X(x0 + run), cy = Y(y1);
+    S('path', { d:'M' + ax + ',' + ay + 'L' + bx + ',' + ay + 'L' + bx + ',' + cy + 'Z', class:'tri' }, L.fill);
+    S('path', { d:'M' + ax + ',' + ay + 'L' + bx + ',' + ay + 'L' + bx + ',' + cy, class:'tri-l' }, L.over);
+    var ty0 = m > 0 ? ay + 17 : ay - 8, ty1 = (ay + cy) / 2 + 4;
+    text((ax + bx) / 2, ty0, 'Δ' + xn + ' = ' + num(run), 'tri-t', 'middle');
+    text(bx + 7, ty1, 'Δ' + yn + ' = ' + num(y1 - y0), 'tri-t', 'start');
+    for(var q = -20; q <= 20; q += 10) cs.labs.push([(ax + bx) / 2 + q, ty0 - 4]);
+    for(var q2 = 0; q2 <= 50; q2 += 10) cs.labs.push([bx + 7 + q2, ty1 - 4]);
+  };
+  cs.rightAngle = function(m1, m2, x, y){
+    var u1x = c.sx, u1y = -m1 * c.sy, l1 = Math.hypot(u1x, u1y), u2x = c.sx, u2y = -m2 * c.sy, l2 = Math.hypot(u2x, u2y), s = 12;
+    u1x *= s / l1; u1y *= s / l1; u2x *= s / l2; u2y *= s / l2;
+    var px = X(x), py = Y(y);
+    S('path', { d:'M' + (px + u1x) + ',' + (py + u1y) + 'L' + (px + u1x + u2x) + ',' + (py + u1y + u2y) + 'L' + (px + u2x) + ',' + (py + u2y), class:'ra' }, L.over);
+  };
+  cs.clearOver = function(){ [L.over, L.fill].forEach(function(g){ while(g.firstChild) g.removeChild(g.firstChild); }); };
+  cs.reset = function(){ [L.over, L.fill, L.plot, L.lab].forEach(function(g){ while(g.firstChild) g.removeChild(g.firstChild); }); cs.lines = []; cs.labs = []; };
+  return cs;
+}
+
+/* ---------- Bausteine ---------- */
+var ZOOM_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 2h4v4M6 14H2v-4M14 2 9.5 6.5M2 14l4.5-4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function figure(cs, narrow){
+  var f = H('figure', 'fig' + (narrow ? ' narrow' : ''));
+  f.appendChild(cs.svg);
+  var b = H('button', 'zoom', ZOOM_ICON); b.type = 'button'; b.setAttribute('aria-label', 'Graph vergrößern');
+  b.addEventListener('click', function(e){ e.stopPropagation(); openLB(cs); });
+  cs.svg.addEventListener('click', function(){ openLB(cs); });
+  f.appendChild(b);
+  return f;
+}
+function fbBox(){ var d = H('div', 'fb'); d.hidden = true; d.setAttribute('aria-live', 'polite'); return d; }
+function showFb(fb, state, html){
+  fb.hidden = false; fb.className = 'fb ' + state;
+  if(state === 'info'){ fb.innerHTML = '<div class="fb-t">' + html + '</div>'; typeset(fb); return; }
+  var ok = state === 'ok';
+  fb.innerHTML = '<span class="fb-i" aria-hidden="true">' + (ok ? '✓' : '✗') + '</span><div class="fb-t"><strong>' + (ok ? 'Richtig.' : 'Nicht ganz.') + '</strong> ' + html + '</div>';
+  typeset(fb);
+}
+function mc(st, id, opts, onCheck, cls){
+  reg(st);
+  var wrap = H('div', 'stack');
+  var list = H('div', 'opts' + (cls ? ' ' + cls : ''));
+  var name = 'q' + st + '-' + id;
+  var labels = opts.map(function(o, i){
+    var l = H('label', 'opt');
+    var r = document.createElement('input'); r.type = 'radio'; r.name = name; r.value = i; r.id = name + '-' + i;
+    l.appendChild(r); l.appendChild(H('span', 'opt-t', o));
+    r.addEventListener('change', function(){ labels.forEach(function(x){ x.classList.remove('is-ok', 'is-bad'); }); });
+    list.appendChild(l); return l;
+  });
+  var row = H('div', 'actions'); var btn = H('button', 'check', 'Prüfen'); btn.type = 'button'; row.appendChild(btn);
+  var fb = fbBox();
+  btn.addEventListener('click', function(){
+    var sel = list.querySelector('input:checked');
+    if(!sel){ showFb(fb, 'info', 'Wähle zuerst eine Antwort aus.'); return; }
+    var i = +sel.value, res = onCheck(i);
+    labels.forEach(function(x){ x.classList.remove('is-ok', 'is-bad'); });
+    labels[i].classList.add(res.ok ? 'is-ok' : 'is-bad');
+    showFb(fb, res.ok ? 'ok' : 'bad', res.html);
+    if(res.ok) solve(st, id);
+  });
+  wrap.appendChild(list); wrap.appendChild(row); wrap.appendChild(fb);
+  return wrap;
+}
+function binary(st, id, words, correct, onCheck){
+  reg(st);
+  var wrap = H('div', 'stack');
+  var row = H('div', 'actions'); var fb = fbBox();
+  var btns = words.map(function(w, i){
+    var b = H('button', 'choice', w); b.type = 'button';
+    b.addEventListener('click', function(){
+      var ok = i === correct;
+      btns.forEach(function(x){ x.classList.remove('is-ok', 'is-bad'); x.setAttribute('aria-pressed', 'false'); });
+      b.classList.add(ok ? 'is-ok' : 'is-bad'); b.setAttribute('aria-pressed', 'true');
+      showFb(fb, ok ? 'ok' : 'bad', onCheck(i, ok));
+      if(ok) solve(st, id);
+    });
+    row.appendChild(b); return b;
+  });
+  wrap.appendChild(row); wrap.appendChild(fb);
+  return wrap;
+}
+
+/* ---------- Station 1 ---------- */
+(function(){
+  var host = document.getElementById('s1-grid');
+  var items = [
+    { draw:function(cs){ cs.line(0.5, 1, 'ln c1'); }, fn:true,
+      vis:function(cs){ cs.dash(2, 2, 'c1'); cs.pt(2, 2, 'c1'); },
+      why:'Jedem x-Wert wird eindeutig ein y-Wert zugeordnet, zum Beispiel dem x-Wert 2 der y-Wert 2. Es liegt also eine Funktion vor.' },
+    { draw:function(cs){ S('circle', { cx:cs.X(0), cy:cs.Y(0), r:3 * cs.c.sx, class:'ln c1' }, cs.L.plot); }, fn:false,
+      vis:function(cs){ var h = Math.sqrt(8); cs.dash(1, h, 'cb'); cs.dash(1, -h, 'cb'); cs.pt(1, h, 'cb'); cs.pt(1, -h, 'cb'); cs.val(1, h, 'y ≈ 2,83', 'cb', { dx:10, dy:-8 }); cs.val(1, -h, 'y ≈ −2,83', 'cb', { dx:10, dy:18 }); },
+      why:'Allen x-Werten zwischen −3 und 3 werden zwei y-Werte zugeordnet, zum Beispiel dem x-Wert 1 die y-Werte ≈ 2,83 und ≈ −2,83. Die Zuordnung ist nicht eindeutig, es liegt keine Funktion vor.' },
+    { draw:function(cs){ S('line', { x1:cs.X(1.5), y1:0, x2:cs.X(1.5), y2:cs.H, class:'ln c1' }, cs.L.plot); }, fn:false,
+      vis:function(cs){ [-3, -1, 1, 3].forEach(function(y){ cs.pt(1.5, y, 'cb'); }); cs.val(1.5, -4.2, 'x = 1,5', 'cb', { dx:10, dy:4 }); },
+      why:'Dem x-Wert 1,5 werden unendlich viele y-Werte zugeordnet, allen anderen x-Werten dagegen gar keiner. Es liegt keine Funktion vor.' },
+    { draw:function(cs){ var pts = [-5.5, 0, 5.5].map(function(x){ return cs.X(x) + ',' + cs.Y(Math.abs(x) - 1); }).join(' '); S('polyline', { points:pts, class:'ln c1' }, cs.L.plot); }, fn:true,
+      vis:function(cs){ cs.dash(-2, 1, 'c1'); cs.dash(2, 1, 'c1'); cs.pt(-2, 1, 'c1'); cs.pt(2, 1, 'c1'); },
+      why:'Trotz des Knicks wird jedem x-Wert eindeutig ein y-Wert zugeordnet. Dass zum Beispiel x = −2 und x = 2 beide den y-Wert 1 haben, ist erlaubt. Es liegt eine Funktion vor.' }
+  ];
+  items.forEach(function(it, k){
+    var cs = makeCS({ aria:'Graph ' + (k + 1) });
+    it.draw(cs);
+    var card = H('article', 'card');
+    card.appendChild(H('div', 'card-k', 'Graph ' + (k + 1)));
+    card.appendChild(figure(cs));
+    card.appendChild(binary('1', k, ['Funktion', 'keine Funktion'], it.fn ? 0 : 1, function(){ cs.clearOver(); it.vis(cs); return it.why; }));
+    host.appendChild(card);
+  });
+})();
+
+/* ---------- Station 2 ---------- */
+(function(){
+  var host = document.getElementById('s2-list');
+  var T2 = [
+    { m:2, t:-1, mT:'2', tT:'-1', x0:0, run:2, frac:'\\frac{4}{2}=2',
+      opts:[[-2,-1,'-2','-1'],[2,-1,'2','-1'],[2,1,'2','1'],[0.5,-1,'\\tfrac12','-1']] },
+    { m:-0.5, t:3, mT:'-\\tfrac12', tT:'3', x0:0, run:2, frac:'\\frac{-1}{2}=-\\tfrac12',
+      opts:[[0.5,3,'\\tfrac12','3'],[-2,3,'-2','3'],[-0.5,3,'-\\tfrac12','3'],[-0.5,-3,'-\\tfrac12','-3']] },
+    { m:1, t:0, mT:'1', tT:'0', x0:1, run:2, frac:'\\frac{2}{2}=1',
+      opts:[[1,0,'1','0'],[-1,0,'-1','0'],[1,1,'1','1'],[2,0,'2','0']] },
+    { m:5/3, t:-1, mT:'\\tfrac53', tT:'-1', x0:0, run:3, frac:'\\frac{5}{3}',
+      opts:[[3/5,-1,'\\tfrac35','-1'],[-5/3,-1,'-\\tfrac53','-1'],[5/3,1,'\\tfrac53','1'],[5/3,-1,'\\tfrac53','-1']] },
+    { m:-4/3, t:2, mT:'-\\tfrac43', tT:'2', x0:0, run:3, frac:'\\frac{-4}{3}=-\\tfrac43',
+      opts:[[4/3,2,'\\tfrac43','2'],[-4/3,2,'-\\tfrac43','2'],[-4/3,-2,'-\\tfrac43','-2'],[-3/4,2,'-\\tfrac34','2']] }
+  ];
+  function diag(q, o){
+    var tri = 'Am Steigungsdreieck liest du \\(m=\\frac{\\Delta y}{\\Delta x}=' + q.frac + '\\) ab.';
+    var mOk = near(o[0], q.m), tOk = near(o[1], q.t);
+    if(mOk && tOk) return { ok:true, html: tri + ' \\(G_f\\) schneidet die y-Achse bei \\(y=' + q.tT + '\\), also ist \\(t=' + q.tT + '\\).' };
+    var p = [];
+    if(mOk) p.push('Die Steigung \\(m=' + q.mT + '\\) stimmt.');
+    else if(near(o[0], -q.m)) p.push('Das Vorzeichen der Steigung stimmt nicht: \\(G_f\\) ' + (q.m > 0 ? 'steigt' : 'fällt') + ', also muss \\(m\\) ' + (q.m > 0 ? 'positiv' : 'negativ') + ' sein. ' + tri);
+    else if(near(o[0] * q.m, 1)) p.push('Bei \\(m=' + o[2] + '\\) sind \\(\\Delta x\\) und \\(\\Delta y\\) vertauscht. ' + tri);
+    else p.push('Die Steigung \\(m=' + o[2] + '\\) passt nicht zum Graphen. ' + tri);
+    if(tOk) p.push('Der y-Achsenabschnitt \\(t=' + q.tT + '\\) stimmt.');
+    else if(near(o[1], -q.t)) p.push('Beim y-Achsenabschnitt stimmt das Vorzeichen nicht: \\(G_f\\) schneidet die y-Achse bei \\(y=' + q.tT + '\\), nicht bei \\(y=' + o[3] + '\\).');
+    else p.push('Der y-Achsenabschnitt passt nicht: \\(G_f\\) schneidet die y-Achse bei \\(y=' + q.tT + '\\), also ist \\(t=' + q.tT + '\\).');
+    p.push('Rot gestrichelt siehst du den Graphen des gewählten Terms.');
+    return { ok:false, html:p.join(' ') };
+  }
+  T2.forEach(function(q, k){
+    var cs = makeCS({ aria:'Graph der Funktion f, Aufgabe ' + (k + 1) });
+    cs.line(q.m, q.t, 'ln c1'); cs.name(q.m, q.t, 'G', 'f', 'c1');
+    var card = H('article', 'card task2');
+    var left = H('div', 'stack');
+    left.appendChild(H('div', 'card-k', 'Graph ' + String.fromCharCode(65 + k)));
+    left.appendChild(figure(cs));
+    var right = H('div', 'stack');
+    right.appendChild(H('p', 'q', 'Welcher Funktionsterm gehört zu \\(G_f\\)?'));
+    var opts = q.opts.map(function(o){ return '\\(' + termTex('f', o[2], o[3]) + '\\)'; });
+    right.appendChild(mc('2', k, opts, function(i){
+      var o = q.opts[i], res = diag(q, o);
+      cs.clearOver(); cs.tri(q.m, q.t, q.x0, q.run);
+      if(!res.ok) cs.line(o[0], o[1], 'ghost', { layer:cs.L.over });
+      return res;
+    }, 'cols-2'));
+    card.appendChild(left); card.appendChild(right);
+    host.appendChild(card);
+  });
+})();
+
+/* ---------- Station 3 ---------- */
+(function(){
+  var host = document.getElementById('s3-grid');
+  var T3 = [
+    { f:[2,1,'2','1'], g:[2,-5,'2','-5'], rel:0 },
+    { f:[-1,4,'-1','4'], g:[1,-2,'1','-2'], rel:1 },
+    { f:[3,-1,'3','-1'], g:[2,4,'2','4'], rel:2, prod:'6' },
+    { f:[0.5,2,'\\tfrac12','2'], g:[-2,5,'-2','5'], rel:1 }
+  ];
+  var WORDS = ['parallel', 'orthogonal', 'weder noch'];
+  function why(p){
+    var m1 = p.f[2], m2 = p.g[2];
+    if(p.rel === 0) return 'Beide Geraden haben die Steigung \\(m_1=m_2=' + m1 + '\\). Ihre y-Achsenabschnitte sind verschieden, also verlaufen sie parallel.';
+    if(p.rel === 1) return 'Mit \\(m_1=' + m1 + '\\) und \\(m_2=' + m2 + '\\) gilt \\(m_1\\cdot m_2=-1\\). Die Geraden stehen also senkrecht aufeinander.';
+    return 'Die Steigungen \\(m_1=' + m1 + '\\) und \\(m_2=' + m2 + '\\) sind verschieden, und das Produkt ist \\(m_1\\cdot m_2=' + p.prod + '\\neq-1\\). Die Geraden sind weder parallel noch orthogonal.';
+  }
+  var WRONG = [
+    'Parallel wären die Geraden nur bei gleicher Steigung.',
+    'Orthogonal wären die Geraden nur, wenn das Produkt der Steigungen \\(-1\\) ergibt.',
+    'Vergleiche die Steigungen noch einmal genau.'
+  ];
+  T3.forEach(function(p, k){
+    var card = H('article', 'card');
+    card.appendChild(H('div', 'card-k', 'Paar ' + (k + 1)));
+    card.appendChild(H('div', 'terms', '<span>\\(' + termTex('f', p.f[2], p.f[3]) + '\\)</span><span>\\(' + termTex('g', p.g[2], p.g[3]) + '\\)</span>'));
+    var cs = makeCS({ aria:'Graphen von f und g, Paar ' + (k + 1) });
+    cs.line(p.f[0], p.f[1], 'ln c1'); cs.line(p.g[0], p.g[1], 'ln c2');
+    cs.name(p.f[0], p.f[1], 'G', 'f', 'c1'); cs.name(p.g[0], p.g[1], 'G', 'g', 'c2');
+    var fig = figure(cs, true); fig.hidden = true;
+    card.appendChild(mc('3', k, WORDS, function(i){
+      var ok = i === p.rel;
+      fig.hidden = false; cs.clearOver();
+      var xs = (p.g[1] - p.f[1]) / (p.f[0] - p.g[0]), ys = p.f[0] * xs + p.f[1];
+      if(p.rel === 1){ cs.rightAngle(p.f[0], p.g[0], xs, ys); cs.pt(xs, ys, 'ci'); }
+      else if(p.rel === 2 && xs > cs.c.xmin && xs < cs.c.xmax && ys > cs.c.ymin && ys < cs.c.ymax) cs.pt(xs, ys, 'ci');
+      var extra = p.rel === 2 ? ' Die Geraden schneiden sich bei \\(S(5\\,|\\,14)\\), also außerhalb des Bildausschnitts.' : '';
+      return { ok:ok, html:(ok ? '' : WRONG[i] + ' ') + why(p) + extra };
+    }));
+    card.appendChild(fig);
+    host.appendChild(card);
+  });
+})();
+
+/* ---------- Station 4 ---------- */
+(function(){
+  var cs = makeCS({ aria:'Graphen der Funktionen f und g' });
+  cs.line(1, -1, 'ln c1'); cs.line(-0.5, 2, 'ln c2');
+  cs.name(1, -1, 'G', 'f', 'c1'); cs.name(-0.5, 2, 'G', 'g', 'c2');
+  var figHost = document.getElementById('s4-fig');
+  figHost.appendChild(figure(cs));
+  figHost.appendChild(H('p', 'caption', '\\(G_f\\) blau, \\(G_g\\) grün. Nach jeder Antwort werden die passenden Funktionswerte gestrichelt eingezeichnet.'));
+  var host = document.getElementById('s4-list');
+  var T4 = [
+    { tex:'\\(f(-2)=-3\\)', truth:true,
+      why:'Es gilt \\(f(-2)=-2-1=-3\\). Dem x-Wert \\(-2\\) wird also der y-Wert \\(-3\\) zugeordnet, der Punkt \\((-2\\,|\\,-3)\\) liegt auf \\(G_f\\).',
+      vis:function(){ cs.dash(-2, -3, 'c1'); cs.pt(-2, -3, 'c1'); cs.val(-2, -3, 'f(−2) = −3', 'c1', { dx:-10, dy:-8, anchor:'end' }); } },
+    { tex:'\\(f(1)\\gt g(1)\\)', truth:false,
+      why:'Es ist \\(f(1)=0\\) und \\(g(1)=1{,}5\\). An der Stelle \\(x=1\\) liegt \\(G_f\\) also unterhalb von \\(G_g\\), es gilt \\(f(1)\\lt g(1)\\).',
+      vis:function(){ cs.dash(1, 1.5, 'c2'); cs.pt(1, 0, 'c1'); cs.pt(1, 1.5, 'c2'); } },
+    { tex:'\\(g(0)=2\\)', truth:true,
+      why:'Es gilt \\(g(0)=-\\tfrac12\\cdot 0+2=2\\). Das ist der y-Achsenabschnitt von \\(G_g\\).',
+      vis:function(){ cs.pt(0, 2, 'c2'); cs.val(0, 2, 'g(0) = 2', 'c2', { dx:10, dy:-10 }); } },
+    { tex:'Wegen \\(f(3)=2\\) liegt der Punkt \\(Q(2\\,|\\,3)\\) auf \\(G_f\\).', truth:false,
+      why:'\\(f(3)=2\\) stimmt zwar, bedeutet aber: Dem x-Wert 3 wird der y-Wert 2 zugeordnet. Auf \\(G_f\\) liegt also der Punkt \\((3\\,|\\,2)\\). Bei \\(Q(2\\,|\\,3)\\) sind die Koordinaten vertauscht, tatsächlich ist \\(f(2)=1\\).',
+      vis:function(){ cs.dash(3, 2, 'c1'); cs.pt(3, 2, 'c1'); cs.val(3, 2, '(3 | 2)', 'c1', { dx:10, dy:18 }); cs.pt(2, 3, 'cb', true); cs.val(2, 3, 'Q(2 | 3)', 'cb', { dx:-10, dy:-8, anchor:'end' }); } },
+    { tex:'Der Punkt \\(P(2\\,|\\,1)\\) liegt auf \\(G_g\\).', truth:true,
+      why:'Setze \\(x=2\\) ein: \\(g(2)=-\\tfrac12\\cdot 2+2=1\\). Das ist genau die y-Koordinate von \\(P\\). Wegen \\(f(2)=1\\) liegt \\(P\\) übrigens auch auf \\(G_f\\): Es ist der Schnittpunkt.',
+      vis:function(){ cs.dash(2, 1, 'c2'); cs.pt(2, 1, 'ci'); cs.val(2, 1, 'P(2 | 1)', 'ci', { dx:0, dy:-32, anchor:'middle' }); } },
+    { tex:'\\(f(4)=g(4)\\)', truth:false,
+      why:'Es ist \\(f(4)=3\\), aber \\(g(4)=0\\). An der Stelle \\(x=4\\) haben die Funktionen also verschiedene Werte.',
+      vis:function(){ cs.dash(4, 3, 'c1'); cs.pt(4, 3, 'c1'); cs.pt(4, 0, 'c2'); } },
+    { tex:'\\(f(-1)-g(-1)=-4{,}5\\)', truth:true,
+      hint:'Lies beide Funktionswerte an der Stelle \\(x=-1\\) am Graphen ab und achte auf die Reihenfolge beim Subtrahieren.',
+      why:'Am Graphen liest du \\(f(-1)=-2\\) und \\(g(-1)=2{,}5\\) ab. Damit gilt \\(f(-1)-g(-1)=-2-2{,}5=-4{,}5\\). Die Differenz ist negativ, weil \\(G_f\\) an der Stelle \\(x=-1\\) unterhalb von \\(G_g\\) liegt. Der senkrechte Abstand der beiden Graphen beträgt dort 4,5 Längeneinheiten.',
+      vis:function(){
+        S('line', { x1:cs.X(-1), y1:cs.Y(-2), x2:cs.X(-1), y2:cs.Y(2.5), class:'hl' }, cs.L.fill);
+        cs.dash(-1, 2.5, 'c2'); cs.dash(-1, -2, 'c1');
+        cs.pt(-1, -2, 'c1'); cs.pt(-1, 2.5, 'c2');
+        cs.val(-1, 2.5, 'g(−1) = 2,5', 'c2', { dx:8, dy:-26, anchor:'start' });
+        cs.val(-1, -2, 'f(−1) = −2', 'c1', { dx:-10, dy:-8, anchor:'end' });
+        cs.val(-1, 1, '4,5', 'cm', { dx:-12, dy:4, anchor:'end' });
+      } }
+  ];
+  T4.forEach(function(s, k){
+    var box = H('div', 'stmt');
+    var row = H('div', 'stmt-row');
+    row.appendChild(H('div', 'stmt-t', '<span class="q-k">' + String.fromCharCode(97 + k) + ')</span>' + s.tex));
+    box.appendChild(row);
+    var b = binary('4', k, ['wahr', 'falsch'], s.truth ? 0 : 1, function(i, ok){ cs.clearOver(); s.vis(); return (!ok && s.hint ? s.hint + ' ' : '') + s.why; });
+    var btnRow = b.querySelector('.actions'); row.appendChild(btnRow);
+    box.appendChild(b);
+    host.appendChild(box);
+  });
+})();
+
+/* ---------- Station 5 ---------- */
+(function(){
+  var cs = makeCS({ aria:'Graphen der Funktionen f und g zu Station 5' });
+  cs.line(0.5, 1, 'ln c1'); cs.line(-1, 4, 'ln c2');
+  cs.name(0.5, 1, 'G', 'f', 'c1'); cs.name(-1, 4, 'G', 'g', 'c2');
+  var figHost = document.getElementById('s5-fig');
+  figHost.appendChild(figure(cs));
+  figHost.appendChild(H('p', 'caption', 'Gelb markiert: der Bereich auf der x-Achse, für den die Ungleichung gilt. Ein leerer Kreis bedeutet, dass der Randwert nicht dazugehört.'));
+  function S0(){ cs.pt(2, 2, 'ci'); }
+  var host = document.getElementById('s5-list');
+  var Q = [
+    { q:'Welche Koordinaten hat der Schnittpunkt \\(S\\) von \\(G_f\\) und \\(G_g\\)?',
+      opts:['\\(S(4\\,|\\,0)\\)', '\\(S(2\\,|\\,2)\\)', '\\(S(0\\,|\\,4)\\)', '\\(S(2\\,|\\,0)\\)'], ok:1,
+      base:'Gleichsetzen: \\(\\tfrac12x+1=-x+4 \\Leftrightarrow \\tfrac32x=3 \\Leftrightarrow x=2\\). Einsetzen ergibt \\(f(2)=2\\), also \\(S(2\\,|\\,2)\\).',
+      wrong:['\\((4\\,|\\,0)\\) ist die Nullstelle von \\(g\\), dort schneidet \\(G_g\\) die x-Achse, nicht \\(G_f\\).', '', '\\((0\\,|\\,4)\\) ist der Schnittpunkt von \\(G_g\\) mit der y-Achse.', 'Die x-Koordinate stimmt, aber der y-Wert ist \\(f(2)=2\\), nicht \\(0\\).'],
+      vis:function(){ cs.dash(2, 2, 'ci'); S0(); cs.val(2, 2, 'S(2 | 2)', 'ci', { dx:18, dy:8 }); } },
+    { q:'Für welche x-Werte gilt \\(f(x)\\gt g(x)\\)?',
+      opts:['\\(x\\lt 2\\)', '\\(x\\gt -2\\)', '\\(x\\geq 2\\)', '\\(x\\gt 2\\)'], ok:3,
+      base:'Rechts vom Schnittpunkt verläuft \\(G_f\\) oberhalb von \\(G_g\\). Rechnerisch: \\(\\tfrac12x+1\\gt -x+4 \\Leftrightarrow \\tfrac32x\\gt 3 \\Leftrightarrow x\\gt 2\\).',
+      wrong:['Links vom Schnittpunkt liegt \\(G_f\\) unterhalb von \\(G_g\\), dort gilt \\(f(x)\\lt g(x)\\).', '\\(x=-2\\) ist die Nullstelle von \\(f\\). Damit vergleichst du \\(f(x)\\) mit \\(0\\), nicht mit \\(g(x)\\).', 'Bei \\(x=2\\) gilt \\(f(2)=g(2)\\). Gefragt ist aber „größer als“, deshalb gehört \\(x=2\\) nicht dazu.', ''],
+      vis:function(){ cs.hl(0.5, 1, 2, null); cs.band(2, null, 'open', null); S0(); } },
+    { q:'Für welche x-Werte gilt \\(g(x)\\geq 0\\)?',
+      opts:['\\(x\\leq 4\\)', '\\(x\\geq 4\\)', '\\(x\\lt 4\\)', '\\(x\\leq 2\\)'], ok:0,
+      base:'\\(G_g\\) verläuft bis zur Nullstelle \\(x=4\\) oberhalb der x-Achse und fällt danach darunter. Wegen \\(g(4)=0\\) gehört \\(x=4\\) dazu.',
+      wrong:['', 'Rechts von \\(x=4\\) liegt \\(G_g\\) unterhalb der x-Achse, denn der Graph fällt.', 'Das Zeichen \\(\\geq\\) schließt den Wert \\(0\\) ein. Wegen \\(g(4)=0\\) gehört \\(x=4\\) dazu.', '\\(x=2\\) ist die Stelle des Schnittpunkts mit \\(G_f\\). Für \\(g(x)\\geq 0\\) spielt \\(G_f\\) keine Rolle.'],
+      vis:function(){ cs.hl(-1, 4, null, 4); cs.band(null, 4, null, 'closed'); } },
+    { q:'Für welche x-Werte verlaufen beide Graphen oberhalb der x-Achse, das heißt \\(f(x)\\gt 0\\) und \\(g(x)\\gt 0\\)?',
+      opts:['\\(x\\gt -2\\)', '\\(x\\lt 4\\)', '\\(-2\\lt x\\lt 4\\)', '\\(-2\\leq x\\leq 4\\)'], ok:2,
+      base:'\\(f(x)\\gt 0\\) gilt für \\(x\\gt -2\\), \\(g(x)\\gt 0\\) gilt für \\(x\\lt 4\\). Beides zugleich gilt nur zwischen den Nullstellen: \\(-2\\lt x\\lt 4\\).',
+      wrong:['Das ist nur die Bedingung für \\(f\\). Für \\(x\\geq 4\\) liegt \\(G_g\\) nicht mehr oberhalb der x-Achse.', 'Das ist nur die Bedingung für \\(g\\). Für \\(x\\leq -2\\) liegt \\(G_f\\) nicht oberhalb der x-Achse.', '', 'An den Nullstellen ist ein Funktionswert genau \\(0\\), also nicht größer als \\(0\\). Die Ränder gehören nicht dazu.'],
+      vis:function(){ cs.hl(0.5, 1, -2, null); cs.hl(-1, 4, null, 4); cs.band(-2, 4, 'open', 'open'); } }
+  ];
+  Q.forEach(function(q, k){
+    var card = H('article', 'card');
+    card.appendChild(H('p', 'q', '<span class="q-k">' + String.fromCharCode(97 + k) + ')</span>' + q.q));
+    card.appendChild(mc('5', k, q.opts, function(i){
+      cs.clearOver(); q.vis();
+      var ok = i === q.ok;
+      return { ok:ok, html:(ok ? '' : q.wrong[i] + ' ') + q.base };
+    }, 'cols-2'));
+    host.appendChild(card);
+  });
+})();
+
+/* ---------- Station 6 ---------- */
+(function(){
+  var host = document.getElementById('s6-grid');
+  var T6 = [
+    { title:'Wasserbecken', story:'Ein Becken enthält 800 Liter Wasser und wird gleichmäßig leergepumpt: Pro Minute laufen 40 Liter ab. \\(V(t)\\) beschreibt das Volumen in Litern nach \\(t\\) Minuten.',
+      opts:[
+        { tex:'V(t)=40t-800', ok:false, why:'Bei \\(t=0\\) ergäbe sich \\(V(0)=-800\\). Ein negatives Volumen ist nicht möglich, der Anfangswert muss \\(+800\\) sein.' },
+        { tex:'V(t)=800-40t', ok:true, why:'Der Anfangswert ist \\(800\\), pro Minute nimmt das Volumen um \\(40\\) ab. Die Steigung ist also \\(-40\\).' },
+        { tex:'V(t)=800+40t', ok:false, why:'Bei \\(+40t\\) würde das Volumen jede Minute zunehmen. Das Becken wird aber geleert, die Steigung muss negativ sein.' },
+        { tex:'V(t)=40t', ok:false, why:'Hier fehlt der Anfangswert von \\(800\\) Litern, und das Volumen würde zunehmen statt abnehmen.' } ] },
+    { title:'Kerze', story:'Eine Kerze ist zu Beginn 20 cm hoch und brennt pro Stunde um 2,5 cm herunter. \\(h(t)\\) beschreibt die Höhe in cm nach \\(t\\) Stunden.',
+      opts:[
+        { tex:'h(t)=2{,}5t-20', ok:false, why:'Bei \\(t=0\\) ergäbe sich \\(h(0)=-20\\). Die Kerze startet aber mit einer Höhe von \\(20\\) cm.' },
+        { tex:'h(t)=20+2{,}5t', ok:false, why:'Bei \\(+2{,}5t\\) würde die Kerze jede Stunde wachsen. Sie brennt aber herunter, die Steigung muss negativ sein.' },
+        { tex:'h(t)=20-2{,}5t', ok:true, why:'Der Anfangswert ist \\(20\\), pro Stunde nimmt die Höhe um \\(2{,}5\\) ab. Die Steigung ist also \\(-2{,}5\\).' },
+        { tex:'h(t)=2{,}5t', ok:false, why:'Hier fehlt die Anfangshöhe von \\(20\\) cm, und die Höhe würde zunehmen.' } ] },
+    { title:'Stoff als Meterware', story:'Ein Stoff kostet 3,50 € pro Meter, zusätzlich fällt eine feste Zuschnittgebühr von 2 € an. \\(P(x)\\) ist der Preis in € für \\(x\\) Meter.',
+      opts:[
+        { tex:'P(x)=2x+3{,}5', ok:false, why:'Grundgebühr und Meterpreis sind vertauscht. Der Preis pro Meter (\\(3{,}5\\)) ist die Steigung, die feste Gebühr (\\(2\\)) der y-Achsenabschnitt.' },
+        { tex:'P(x)=3{,}5x', ok:false, why:'Hier fehlt die feste Zuschnittgebühr von \\(2\\) €.' },
+        { tex:'P(x)=3{,}5x-2', ok:false, why:'Die Gebühr wird zusätzlich bezahlt, sie muss also addiert und nicht abgezogen werden.' },
+        { tex:'P(x)=3{,}5x+2', ok:true, why:'\\(3{,}50\\) € pro Meter ergibt die Steigung \\(3{,}5\\), die feste Gebühr von \\(2\\) € ist der y-Achsenabschnitt.' } ] },
+    { title:'Zugfahrt', story:'Ein Zug fährt mit einer konstanten Geschwindigkeit von 120 km/h. \\(s(t)\\) ist die zurückgelegte Strecke in km nach \\(t\\) Stunden.',
+      opts:[
+        { tex:'s(t)=120t', ok:true, why:'In jeder Stunde kommen \\(120\\) km hinzu, die Steigung ist also \\(120\\). Zu Beginn ist noch keine Strecke zurückgelegt, deshalb ist der y-Achsenabschnitt \\(0\\).' },
+        { tex:'s(t)=120+t', ok:false, why:'Hier wäre die Steigung nur \\(1\\), also 1 km pro Stunde. Außerdem wären zu Beginn schon \\(120\\) km zurückgelegt.' },
+        { tex:'s(t)=\\tfrac{t}{120}', ok:false, why:'Die Geschwindigkeit muss als Faktor vor \\(t\\) stehen, nicht im Nenner. So würde der Zug nur \\(\\tfrac{1}{120}\\) km pro Stunde fahren.' },
+        { tex:'s(t)=120t-120', ok:false, why:'Bei \\(t=0\\) ergäbe sich \\(s(0)=-120\\). Eine negative zurückgelegte Strecke ist nicht sinnvoll.' } ] }
+  ];
+  /* Skizzen der richtigen Lösung: 1 Kästchen = 12 px, Achsen in Sacheinheiten */
+  var SK = [
+    { cs:{ xmin:-2.5, xmax:24, ymin:-110, ymax:960, sx:12, sy:0.3, gx:1, gy:40, tx:5, ty:200, lx:5, ly:200, xName:'t', yName:'V', xTitle:'Zeit in min', yTitle:'Volumen in l' },
+      m:-40, b:800, to:20, sub:'V', x0:5, run:5, start:'V(0) = 800', so:{ dx:10, dy:-10 }, end:20,
+      cap:'Skizze der Lösung <span class="m"><i>V</i>(<i>t</i>) = 800 − 40<i>t</i></span>. Nach 20 Minuten ist das Becken leer.' },
+    { cs:{ xmin:-1, xmax:10, ymin:-2.8, ymax:23.5, sx:24, sy:12, gx:0.5, gy:1, tx:1, ty:5, lx:1, ly:5, xName:'t', yName:'h', xTitle:'Zeit in h', yTitle:'Höhe in cm' },
+      m:-2.5, b:20, to:8, sub:'h', x0:2, run:2, start:'h(0) = 20', so:{ dx:10, dy:-10 }, end:8,
+      cap:'Skizze der Lösung <span class="m"><i>h</i>(<i>t</i>) = 20 − 2,5<i>t</i></span>. Nach 8 Stunden ist die Kerze abgebrannt.' },
+    { cs:{ xmin:-1, xmax:9.8, ymin:-5.5, ymax:34, sx:24, sy:6, gx:0.5, gy:2, tx:1, ty:10, lx:1, ly:10, xName:'x', yName:'P', xTitle:'Länge in m', yTitle:'Preis in €' },
+      m:3.5, b:2, to:8, sub:'P', x0:2, run:2, start:'P(0) = 2', so:{ dx:14, dy:5 }, end:null,
+      cap:'Skizze der Lösung <span class="m"><i>P</i>(<i>x</i>) = 3,5<i>x</i> + 2</span>. Der Graph beginnt bei 2 €, der festen Zuschnittgebühr.' },
+    { cs:{ xmin:-0.75, xmax:4.8, ymin:-68, ymax:560, sx:48, sy:0.48, gx:0.25, gy:25, tx:0.5, ty:100, lx:1, ly:100, xName:'t', yName:'s', xTitle:'Zeit in h', yTitle:'Strecke in km' },
+      m:120, b:0, to:4, sub:'s', x0:1, run:1, start:null, so:null, end:null,
+      cap:'Skizze der Lösung <span class="m"><i>s</i>(<i>t</i>) = 120<i>t</i></span>. Der Graph ist eine Ursprungsgerade, weil zu Beginn noch keine Strecke zurückgelegt ist.' }
+  ];
+  T6.forEach(function(q, k){
+    var sk = SK[k], o = { origin:true, xTitleBelow:true, aria:'Skizze zur Aufgabe ' + q.title };
+    for(var key in sk.cs) o[key] = sk.cs[key];
+    var cs = makeCS(o);
+    cs.line(sk.m, sk.b, 'ln c1', { from:0, to:sk.to });
+    cs.pt(0, sk.b, 'c1');
+    if(sk.start) cs.val(0, sk.b, sk.start, 'c1', sk.so);
+    if(sk.end != null) cs.pt(sk.end, 0, 'c1');
+    cs.name(sk.m, sk.b, 'G', sk.sub, 'c1', 0, sk.to);
+    var sketch = H('div', 'stack'); sketch.hidden = true;
+    sketch.appendChild(figure(cs, true));
+    sketch.appendChild(H('p', 'caption', sk.cap));
+
+    var card = H('article', 'card');
+    card.appendChild(H('h3', null, q.title));
+    card.appendChild(H('p', 'q', q.story));
+    var show = H('button', 'choice', 'Graph anzeigen'); show.type = 'button'; show.hidden = true;
+    show.setAttribute('aria-expanded', 'false');
+    show.addEventListener('click', function(){
+      var open = sketch.hidden;
+      sketch.hidden = !open;
+      show.textContent = open ? 'Graph ausblenden' : 'Graph anzeigen';
+      show.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    var task = mc('6', k, q.opts.map(function(op){ return '\\(' + op.tex + '\\)'; }), function(i){
+      show.hidden = false;
+      var op = q.opts[i];
+      return { ok:op.ok, html:op.why };
+    }, 'cols-2');
+    task.querySelector('.actions').appendChild(show);
+    card.appendChild(task);
+    card.appendChild(sketch);
+    host.appendChild(card);
+  });
+})();
+
+/* ---------- Station 7 ---------- */
+var CS7 = { xmin:-3.5, xmax:27, ymin:-32, ymax:345, sx:11.5, sy:0.95, gx:1, gy:10, tx:2, ty:50, lx:2, ly:50, origin:true, xTitle:'Anzahl der Besuche', yTitle:'Kosten in €' };
+(function(){
+  var o = {}; for(var k in CS7) o[k] = CS7[k]; o.aria = 'Kostengraphen für Einzeleintritt und Mitgliedschaft';
+  var cs = makeCS(o);
+  cs.line(12, 0, 'ln c1'); cs.line(7, 60, 'ln c2');
+  cs.name(12, 0, 'G', 'E', 'c1'); cs.name(7, 60, 'G', 'M', 'c2');
+  cs.pt(12, 144, 'ci'); cs.val(12, 144, 'S(12 | 144)', 'ci', { dx:10, dy:22 });
+  var figHost = document.getElementById('s7-fig');
+  var ph = H('div', 'placeholder', '<p>Der Graph erscheint, sobald du in a) beide Funktionsterme richtig angegeben hast.</p>');
+  var figWrap = H('div', 'stack'); figWrap.hidden = true;
+  figWrap.appendChild(figure(cs));
+  figHost.appendChild(ph); figHost.appendChild(figWrap);
+  var unlocked = false;
+  function unlock(){
+    if(unlocked) return; unlocked = true;
+    ph.hidden = true; figWrap.hidden = false;
+    var cap = H('p', 'caption', '\\(G_E\\) Einzeleintritt (blau), \\(G_M\\) Mitgliedschaft (grün). Kosten in € über der Anzahl der Besuche.');
+    figWrap.appendChild(cap); typeset(cap);
+    document.getElementById('s7-explore').hidden = false;
+  }
+  var host = document.getElementById('s7-list');
+
+  /* a) Funktionsterme eingeben */
+  function parseLin(str){
+    var s = String(str).toLowerCase().replace(/\s+/g, '').replace(/[−–]/g, '-').replace(/[·*×]/g, '').replace(/,/g, '.').replace(/€/g, '');
+    s = s.replace(/^[a-z]\(x\)=/, '').replace(/^y=/, '');
+    if(!s || s.indexOf('=') >= 0) return null;
+    var toks = s.match(/[+-]?[^+-]+/g);
+    if(!toks || toks.join('') !== s) return null;
+    var m = 0, t = 0, NUM = /^(\d+(\.\d*)?|\.\d+)$/;
+    for(var i = 0; i < toks.length; i++){
+      var tok = toks[i], sg = tok.charAt(0) === '-' ? -1 : 1, body = tok.replace(/^[+-]/, '');
+      if(body.indexOf('x') >= 0){
+        if(body.split('x').length !== 2) return null;
+        var cf = body.replace('x', '');
+        if(cf === '') m += sg;
+        else if(NUM.test(cf)) m += sg * parseFloat(cf);
+        else return null;
+      } else if(NUM.test(body)) t += sg * parseFloat(body);
+      else return null;
+    }
+    return { m:m, t:t };
+  }
+  var UNREAD = 'Die Eingabe kann nicht gelesen werden. Schreibe den Term mit der Variablen \\(x\\), zum Beispiel <span class="kbd">5x+20</span>.';
+  function diagE(p){
+    if(!p) return { ok:false, msg:UNREAD };
+    if(near(p.m, 12) && near(p.t, 0)) return { ok:true, msg:'stimmt.' };
+    if(near(p.m, 0)) return { ok:false, msg:'Es fehlt die Variable \\(x\\). Die Kosten hängen von der Anzahl der Besuche ab.' };
+    if(near(p.m, 1) && near(p.t, 12)) return { ok:false, msg:'Die 12 € fallen bei jedem Besuch an. Sie gehören deshalb als Steigung vor das \\(x\\) und nicht als Summand dahinter.' };
+    if(near(p.m, 12)) return { ok:false, msg:'Die Steigung 12 stimmt. Ohne Besuch fallen beim Einzeleintritt aber keine Kosten an, der y-Achsenabschnitt ist also 0.' };
+    return { ok:false, msg:'Überlege, wie viel jeder einzelne Besuch kostet. Dieser Betrag ist die Steigung von \\(E\\).' };
+  }
+  function diagM(p){
+    if(!p) return { ok:false, msg:UNREAD };
+    if(near(p.m, 7) && near(p.t, 60)) return { ok:true, msg:'stimmt.' };
+    if(near(p.m, 60) && near(p.t, 7)) return { ok:false, msg:'Steigung und y-Achsenabschnitt sind vertauscht. Die 7 € werden bei jedem Besuch bezahlt (Steigung), die 60 € nur einmal (y-Achsenabschnitt).' };
+    if(near(p.m, 7) && near(p.t, -60)) return { ok:false, msg:'Die Aufnahmegebühr kommt zu den Kosten hinzu. Sie muss also addiert und nicht abgezogen werden.' };
+    if(near(p.m, 7) && near(p.t, 0)) return { ok:false, msg:'Die einmalige Aufnahmegebühr von 60 € fehlt. Sie ist der y-Achsenabschnitt.' };
+    if(near(p.m, 67) || (near(p.m, 0) && near(p.t, 67))) return { ok:false, msg:'Die 60 € werden nur einmal bezahlt, die 7 € dagegen bei jedem Besuch. Diese beiden Beträge dürfen nicht zusammengefasst werden.' };
+    if(near(p.m, 7)) return { ok:false, msg:'Die Steigung 7 stimmt, aber der y-Achsenabschnitt passt nicht. Die einmalige Aufnahmegebühr beträgt 60 €.' };
+    if(near(p.t, 60)) return { ok:false, msg:'Der y-Achsenabschnitt 60 stimmt, aber die Steigung passt nicht. Mitglieder zahlen pro Besuch 7 €.' };
+    return { ok:false, msg:'Überlege, was einmalig bezahlt wird (y-Achsenabschnitt) und was bei jedem Besuch (Steigung).' };
+  }
+  (function(){
+    reg('7');
+    var card = H('article', 'card');
+    card.appendChild(H('p', 'q', '<span class="q-k">a)</span>Stelle die Funktionsterme \\(E(x)\\) und \\(M(x)\\) auf und gib sie ein, zum Beispiel in der Form <span class="kbd">5x+20</span>. Dezimalzahlen schreibst du mit Komma.'));
+    var rows = H('div', 'term-rows');
+    function field(id, letter){
+      var row = H('div', 'term-row');
+      var lab = H('label', 'term-l', '<span class="m"><i>' + letter + '</i>(<i>x</i>) =</span>'); lab.htmlFor = id;
+      var inp = document.createElement('input');
+      inp.type = 'text'; inp.id = id; inp.className = 'term-in'; inp.autocomplete = 'off'; inp.spellcheck = false;
+      inp.setAttribute('autocapitalize', 'off'); inp.setAttribute('autocorrect', 'off'); inp.setAttribute('enterkeyhint', 'done');
+      inp.placeholder = 'Term mit x';
+      row.appendChild(lab); row.appendChild(inp); rows.appendChild(row);
+      return inp;
+    }
+    var inE = field('inE', 'E'), inM = field('inM', 'M');
+    var act = H('div', 'actions');
+    var chk = H('button', 'check', 'Prüfen'); chk.type = 'button';
+    var sol = H('button', 'choice', 'Lösung anzeigen'); sol.type = 'button'; sol.hidden = true;
+    act.appendChild(chk); act.appendChild(sol);
+    var fb = fbBox();
+    card.appendChild(rows); card.appendChild(act); card.appendChild(fb);
+    function mark(inp, st){ inp.classList.remove('is-ok', 'is-bad'); if(st) inp.classList.add(st); }
+    chk.addEventListener('click', function(){
+      if(!inE.value.trim() || !inM.value.trim()){ showFb(fb, 'info', 'Gib beide Funktionsterme ein.'); return; }
+      var rE = diagE(parseLin(inE.value)), rM = diagM(parseLin(inM.value));
+      mark(inE, rE.ok ? 'is-ok' : 'is-bad'); mark(inM, rM.ok ? 'is-ok' : 'is-bad');
+      if(rE.ok && rM.ok){
+        showFb(fb, 'ok', 'Beim Einzeleintritt kostet jeder Besuch 12 €, ohne Besuch fallen keine Kosten an, also \\(E(x)=12x\\). Bei der Mitgliedschaft ist der Preis pro Besuch die Steigung und die Aufnahmegebühr der y-Achsenabschnitt, also \\(M(x)=7x+60\\).');
+        sol.hidden = true; solve('7', 'in'); unlock();
+      } else {
+        showFb(fb, 'bad', '<span class="fb-line">\\(E(x)\\): ' + rE.msg + '</span><span class="fb-line">\\(M(x)\\): ' + rM.msg + '</span>');
+        sol.hidden = false;
+      }
+    });
+    [inE, inM].forEach(function(inp){
+      inp.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); chk.click(); } });
+      inp.addEventListener('input', function(){ mark(inp, null); });
+    });
+    sol.addEventListener('click', function(){
+      inE.value = '12x'; inM.value = '7x+60'; mark(inE, null); mark(inM, null);
+      showFb(fb, 'info', 'Lösung: \\(E(x)=12x\\) und \\(M(x)=7x+60\\). Die Kosten pro Besuch sind jeweils die Steigung, die einmalige Aufnahmegebühr ist der y-Achsenabschnitt von \\(M\\).');
+      sol.hidden = true; unlock();
+    });
+    host.appendChild(card);
+  })();
+  var TABLE = '<table class="mini"><thead><tr><th>Besuche \\(x\\)</th><th>\\(E(x)\\)</th><th>\\(M(x)\\)</th></tr></thead><tbody>' +
+    '<tr><td>11</td><td>132 €</td><td>137 €</td></tr><tr class="eq"><td>12</td><td>144 €</td><td>144 €</td></tr><tr class="win"><td>13</td><td>156 €</td><td>151 €</td></tr></tbody></table>';
+  var Q = [
+    { q:'Was bedeutet der Schnittpunkt \\(S(12\\,|\\,144)\\) im Sachzusammenhang?',
+      opts:['Nach 12 Monaten hat man mit der Mitgliedschaft 144 € bezahlt.', 'Bei 12 Besuchen kosten beide Varianten gleich viel, nämlich 144 €.', 'Ab 144 Besuchen lohnt sich die Mitgliedschaft.', 'Bei 12 Besuchen spart man mit der Mitgliedschaft 144 €.'], ok:1,
+      why:['\\(x\\) ist die Anzahl der Besuche und keine Zeitangabe. Von Monaten ist in der Aufgabe keine Rede.', 'Am Schnittpunkt gilt \\(E(12)=M(12)=144\\). Beide Varianten kosten bei 12 Besuchen also 144 €.', 'Hier sind die Koordinaten vertauscht: 12 ist die Anzahl der Besuche, 144 der Preis in €.', 'Am Schnittpunkt sind beide Kosten gleich, die Ersparnis ist dort also genau 0 €.'],
+      vis:function(){ cs.dash(12, 144, 'ci'); } },
+    { q:'Mit welcher Ungleichung findest du heraus, wann die Mitgliedschaft günstiger ist als der Einzeleintritt?',
+      opts:['\\(M(x)\\gt E(x)\\)', '\\(7x\\lt 12x\\)', '\\(M(x)=E(x)\\)', '\\(M(x)\\lt E(x)\\)'], ok:3,
+      why:['Diese Ungleichung beschreibt, wann die Mitgliedschaft teurer ist.', 'Hier fehlt die Aufnahmegebühr von 60 €. Ohne sie wäre die Mitgliedschaft ab dem ersten Besuch günstiger.', 'Eine Gleichung liefert nur die Stelle, an der beide gleich teuer sind, also den Schnittpunkt.', '„Günstiger“ heißt: Die Kosten \\(M(x)\\) sind kleiner als \\(E(x)\\). Es folgt \\(7x+60\\lt 12x \\Leftrightarrow 60\\lt 5x \\Leftrightarrow x\\gt 12\\). Im Graphen liegt \\(G_M\\) rechts von \\(S\\) unterhalb von \\(G_E\\).'],
+      vis:function(){ cs.hl(7, 60, 12, null); cs.band(12, null, 'open', null); } },
+    { q:'Ab dem wievielten Besuch ist die Mitgliedschaft tatsächlich günstiger?',
+      opts:['ab dem 9. Besuch', 'ab dem 12. Besuch', 'ab dem 13. Besuch', 'ab dem 144. Besuch'], ok:2,
+      why:['Vermutlich hast du \\(60:7\\approx 8{,}6\\) gerechnet. Dabei fehlt der Vergleich mit dem Einzeleintritt.', 'Beim 12. Besuch sind beide Varianten gleich teuer. Die Mitgliedschaft ist dort also noch nicht günstiger.', 'Aus \\(x\\gt 12\\) folgt: Da nur ganze Besuche möglich sind, ist der 13. Besuch der erste, bei dem die Mitgliedschaft günstiger ist.', '144 ist ein Preis in € (y-Wert), keine Anzahl von Besuchen.'],
+      table:true,
+      vis:function(){ cs.dash(12, 144, 'ci'); cs.dash(13, 156, 'c1'); cs.pt(13, 156, 'c1'); cs.pt(13, 151, 'c2'); } },
+    { q:'Die Kletterhalle erhöht die Aufnahmegebühr auf 80 €. Was passiert mit \\(G_M\\) und dem Schnittpunkt?',
+      opts:['\\(G_M\\) wird steiler, der Schnittpunkt wandert nach links.', '\\(G_M\\) wird um 20 nach oben verschoben, der Schnittpunkt wandert nach rechts zu \\(x=16\\).', '\\(G_M\\) wird nach oben verschoben, der Schnittpunkt bleibt bei \\(x=12\\).', '\\(G_M\\) wird nach unten verschoben, die Mitgliedschaft lohnt sich früher.'], ok:1,
+      why:['Die Steigung ist der Preis pro Besuch (7 €), und der ändert sich nicht. Nur der y-Achsenabschnitt wird größer.', 'Der y-Achsenabschnitt steigt von 60 auf 80, \\(G_M\\) wird also parallel nach oben verschoben. Aus \\(7x+80=12x\\) folgt \\(x=16\\). Probiere es unten mit dem Regler aus.', 'Weil \\(G_M\\) höher liegt, holt \\(G_E\\) ihn erst später ein. Aus \\(7x+80=12x\\) folgt \\(x=16\\), nicht \\(12\\).', 'Eine höhere Gebühr verschiebt \\(G_M\\) nach oben, nicht nach unten. Die Mitgliedschaft lohnt sich dadurch erst später.'],
+      vis:function(){} }
+  ];
+  Q.forEach(function(q, k){
+    var card = H('article', 'card');
+    card.appendChild(H('p', 'q', '<span class="q-k">' + String.fromCharCode(98 + k) + ')</span>' + q.q));
+    card.appendChild(mc('7', k, q.opts, function(i){
+      cs.clearOver(); q.vis();
+      return { ok:i === q.ok, html:q.why[i] + (q.table ? TABLE : '') };
+    }));
+    host.appendChild(card);
+  });
+
+  /* Erkunden */
+  var o2 = {}; for(var k2 in CS7) o2[k2] = CS7[k2]; o2.aria = 'Veränderbare Kostengraphen';
+  var ex = makeCS(o2);
+  document.getElementById('s7-fig2').appendChild(figure(ex));
+  var fee = document.getElementById('fee'), rate = document.getElementById('rate');
+  function draw(){
+    var a = +fee.value, p = +rate.value;
+    document.getElementById('feeOut').textContent = a + ' €';
+    document.getElementById('rateOut').textContent = p + ' €';
+    ex.reset();
+    ex.line(12, 0, 'ln c1'); ex.line(p, a, 'ln c2');
+    ex.name(12, 0, 'G', 'E', 'c1'); ex.name(p, a, 'G', 'M', 'c2');
+    var x0 = a / (12 - p), y0 = 12 * x0, whole = Math.abs(x0 - Math.round(x0)) < 1e-9;
+    var inView = x0 < ex.c.xmax - 0.5 && y0 < ex.c.ymax - 10;
+    if(a > 0 && inView){ ex.dash(x0, y0, 'ci'); ex.pt(x0, y0, 'ci'); ex.band(x0, null, 'open', null); }
+    document.getElementById('termOut').innerHTML = '<span class="m"><i>M</i>(<i>x</i>) = ' + p + '<i>x</i>' + (a ? ' + ' + a : '') + '</span>';
+    var eq;
+    if(a === 0) eq = 'nur bei 0 Besuchen';
+    else eq = 'bei ' + (whole ? '' : '≈ ') + num(Math.round(x0 * 10) / 10) + ' Besuchen (' + (whole ? '' : '≈ ') + num(Math.round(y0)) + ' €)' + (inView ? '' : ', außerhalb des Bildausschnitts');
+    document.getElementById('eqOut').textContent = eq;
+    var first = a === 0 ? 1 : (whole ? Math.round(x0) + 1 : Math.ceil(x0));
+    document.getElementById('winOut').textContent = 'ab dem ' + first + '. Besuch';
+  }
+  fee.addEventListener('input', draw); rate.addEventListener('input', draw);
+  draw();
+})();
+
+updateProgress();
+typeset();
+})();
+</script>
+
+</body>
+</html>
