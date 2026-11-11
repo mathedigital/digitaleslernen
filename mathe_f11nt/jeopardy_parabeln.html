@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parabel-Jeopardy</title>
+<style>
+:root{
+  --bg:#0b1640; --bg2:#13246b; --tile:#1a3399; --gold:#ffcc33; --text:#f4f6ff; --muted:#a9b8ec;
+  --ok:#22b35e; --bad:#e04a3b; --ink:#1b2340;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:radial-gradient(ellipse at top,#1d3088 0%,var(--bg) 65%) fixed;color:var(--text);min-height:100vh}
+button{font-family:inherit}
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex;flex-direction:column}
+
+/* ---------- Start ---------- */
+.box{width:min(760px,94vw);margin:5vh auto;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:22px;padding:30px 34px;box-shadow:0 20px 50px #0006}
+.logo{font-size:clamp(2.2rem,6vw,3.8rem);font-weight:900;letter-spacing:.05em;color:var(--gold);text-shadow:0 4px 0 #000a;margin:0;text-align:center}
+.logo small{display:block;font-size:.35em;letter-spacing:.2em;color:var(--muted);text-shadow:none;margin-top:6px;font-weight:700}
+.sec{margin-top:24px}
+.sec h3{margin:0 0 10px;font-size:1rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+select,input[type=text]{padding:10px 12px;border-radius:10px;border:2px solid #2d4296;background:#0e1b52;color:#fff;font-size:1.05rem}
+input[type=text]{width:100%}
+input[type=text]:focus,select:focus{outline:none;border-color:var(--gold)}
+#names{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.nm{display:flex;align-items:center;gap:8px}
+.dot{width:16px;height:16px;border-radius:50%;flex:0 0 16px;box-shadow:0 0 0 2px #fff3}
+.nm .rm{background:transparent;border:0;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:4px 6px;border-radius:8px}
+.nm .rm:hover{background:#ffffff1a;color:#fff}
+.nm .rm:disabled{visibility:hidden}
+.addrow{display:flex;align-items:center;gap:14px;margin-top:12px;flex-wrap:wrap}
+.mini{color:var(--muted);font-size:.9rem}
+.nocalc{margin-top:22px;background:rgba(255,204,51,.14);border:2px solid var(--gold);border-radius:14px;padding:12px 16px;text-align:center;font-size:1.15rem}
+.nocalc-badge{background:#ffffff22;border-radius:999px;padding:4px 12px;font-size:.9rem;font-weight:700;white-space:nowrap}
+.confirm-box{background:#fff;color:var(--ink);border-radius:18px;padding:26px 30px;width:min(460px,100%);text-align:center;box-shadow:0 20px 60px #000b;animation:pop .2s ease-out}
+.confirm-box p{font-size:1.15rem;margin:0 0 20px}
+.confirm-box .actions{margin-top:0}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:0;border:2px solid #2d4296;border-radius:14px;overflow:hidden}
+.seg button{background:#0e1b52;color:var(--muted);border:0;padding:12px 10px;font-size:1rem;font-weight:700;cursor:pointer;line-height:1.3;transition:background .15s,color .15s}
+.seg button span{font-weight:400;font-size:.88rem}
+.seg button:hover{color:#fff}
+.seg button.on{background:var(--gold);color:#1b1b1b}
+.rules-box{background:#fff;color:var(--ink);border-radius:18px;padding:28px 34px;width:min(760px,100%);max-height:94vh;overflow:auto;box-shadow:0 20px 60px #000b;animation:pop .2s ease-out}
+.rules-box h2{margin:0 0 14px;color:#1a3399;font-size:1.8rem}
+.rules-box ol{margin:0;padding-left:1.4em;display:grid;gap:12px;font-size:clamp(1.05rem,1.8vw,1.3rem);line-height:1.5}
+.rules-box li::marker{font-weight:900;color:#1a3399}
+.opts{display:grid;gap:10px}
+.opt{display:flex;align-items:center;gap:10px;font-size:1.02rem}
+.opt input[type=checkbox]{width:20px;height:20px;accent-color:var(--gold)}
+.btn{cursor:pointer;border:0;border-radius:12px;padding:12px 22px;font-size:1.05rem;font-weight:800;background:var(--gold);color:#1b1b1b;transition:filter .15s,transform .1s}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--text);border:2px solid rgba(255,255,255,.3)}
+.btn.small{padding:8px 14px;font-size:.92rem}
+.btn:disabled{opacity:.4;cursor:default}
+.actions{display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap}
+
+/* ---------- Spielbrett ---------- */
+header{display:flex;align-items:center;gap:16px;padding:12px 16px;flex-wrap:wrap}
+header .title{font-weight:900;color:var(--gold);font-size:1.4rem;letter-spacing:.04em;text-shadow:0 2px 0 #000a}
+.turnBadge{margin:0 auto;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);padding:8px 18px;border-radius:999px;font-size:1.1rem}
+.turnBadge b{font-size:1.2rem}
+.hbtns{display:flex;gap:8px}
+#board{flex:1;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:auto repeat(5,minmax(64px,1fr));gap:10px;padding:0 16px}
+.cat{background:var(--bg2);border-radius:12px;padding:12px 8px;text-align:center;font-weight:800;text-transform:uppercase;letter-spacing:.03em;font-size:clamp(.8rem,1.45vw,1.15rem);display:flex;align-items:center;justify-content:center;min-height:72px;border-bottom:4px solid var(--gold);line-height:1.25}
+.tile{background:linear-gradient(180deg,#2445bb,#16308c);border:0;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:clamp(1.6rem,4vw,3rem);font-weight:900;color:var(--gold);cursor:pointer;box-shadow:inset 0 -5px 0 #0007,0 4px 12px #0005;transition:transform .12s,filter .12s;text-shadow:0 2px 0 #000a}
+.tile:hover{transform:translateY(-3px) scale(1.02);filter:brightness(1.18)}
+.tile.used{background:#0c1640;box-shadow:inset 0 0 0 2px #ffffff12;cursor:default;transform:none;filter:none;flex-direction:column;gap:2px}
+.tile.used .who{font-size:clamp(.75rem,1.2vw,1rem);font-weight:800;text-shadow:none;color:var(--c,#7d8bbf);max-width:95%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile.used .pts{font-size:clamp(.7rem,1vw,.9rem);color:#7d8bbf;text-shadow:none;font-weight:600}
+#scores{display:flex;gap:12px;padding:14px 16px 18px;flex-wrap:wrap;justify-content:center}
+.sc{flex:1 1 150px;max-width:250px;background:rgba(255,255,255,.07);border-radius:14px;padding:10px 12px 8px;text-align:center;border-top:6px solid var(--c);transition:background .2s,box-shadow .2s}
+.sc.turn{background:rgba(255,204,51,.14);box-shadow:0 0 0 3px var(--gold)}
+.sc .n{font-weight:800;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc .p{font-size:2.1rem;font-weight:900;line-height:1.1}
+.sc .p.neg{color:#ff8a80}
+.sc .adj{display:flex;gap:6px;justify-content:center;margin-top:4px}
+.sc .adj button{background:#ffffff14;border:0;color:var(--muted);border-radius:8px;padding:2px 10px;cursor:pointer;font-size:.85rem}
+.sc .adj button:hover{background:#ffffff2a;color:#fff}
+
+/* ---------- Fragekarte ---------- */
+.overlay{position:fixed;inset:0;background:#030820d9;display:flex;align-items:center;justify-content:center;padding:18px;z-index:10;backdrop-filter:blur(3px)}
+.overlay.hidden{display:none}
+.card{background:#fff;color:var(--ink);border-radius:18px;width:min(1100px,100%);max-height:96vh;overflow:auto;box-shadow:0 20px 60px #000b;animation:pop .25s ease-out}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.card-head{background:var(--tile);color:#fff;display:flex;justify-content:space-between;align-items:center;padding:14px 24px;font-weight:800;font-size:1.15rem;position:sticky;top:0;z-index:2}
+.card-head .val{color:var(--gold);font-size:1.5rem}
+.dd{background:repeating-linear-gradient(45deg,#ffcc33,#ffcc33 14px,#ffdb66 14px,#ffdb66 28px);color:#4a3200;text-align:center;font-weight:900;font-size:1.4rem;padding:10px;letter-spacing:.08em;animation:pulse 1s ease-in-out 3}
+@keyframes pulse{50%{transform:scale(1.03)}}
+.dd.hidden{display:none}
+.card-body{padding:22px 28px;display:grid;gap:24px;grid-template-columns:1fr}
+.card-body.with-graph{grid-template-columns:1fr 1fr;align-items:start}
+.left{display:flex;flex-direction:column;gap:18px}
+.q{font-size:clamp(1.2rem,2.2vw,1.65rem);line-height:1.55}
+.q .m,.answer .m{font-family:"Cambria Math",Cambria,"Times New Roman",serif;white-space:nowrap;font-size:1.08em}
+.graph svg{width:100%;max-width:470px;max-height:62vh;display:block;margin:0 auto}
+.timer{display:flex;align-items:center;gap:12px}
+.timer.hidden{display:none}
+.bar{flex:1;height:14px;background:#e4e8f5;border-radius:99px;overflow:hidden}
+#tBar{height:100%;width:100%;background:linear-gradient(90deg,#3cb371,#7bd389);border-radius:99px;transition:width .25s linear}
+#tBar.warn{background:linear-gradient(90deg,#f39c12,#f5b041)}
+#tBar.over{background:var(--bad)}
+#tTxt{font-weight:800;min-width:110px;text-align:right;font-variant-numeric:tabular-nums}
+.btn.blue{background:#1a3399;color:#fff}
+.btn.lite{background:#e9edf8;color:var(--ink)}
+.answer{background:#eafaf0;border-left:6px solid var(--ok);border-radius:10px;padding:14px 18px;font-size:clamp(1.15rem,2vw,1.45rem);font-weight:700;animation:pop .2s ease-out}
+.answer.hidden{display:none}
+.answer .way{font-size:clamp(.95rem,1.4vw,1.08rem);font-weight:400;color:#2d3550;margin-top:8px;line-height:1.55}
+.score-area{border-top:1px solid #e3e7f2;padding:16px 28px;background:#f6f8fd}
+.score-area .hint{font-weight:700;color:#55607f;margin-bottom:10px;font-size:.95rem}
+#mGroups{display:flex;flex-wrap:wrap;gap:10px}
+.gr{display:flex;align-items:center;gap:6px;background:#fff;border:2px solid #e3e7f2;border-left:6px solid var(--c);border-radius:12px;padding:6px 8px 6px 12px}
+.gr .gn{font-weight:800;margin-right:4px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gr button{border:2px solid #d5dbeb;background:#fff;border-radius:9px;width:40px;height:36px;font-size:1.15rem;font-weight:900;cursor:pointer;color:#8590ad}
+.gr button.r.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.gr button.f.on{background:var(--bad);border-color:var(--bad);color:#fff}
+.gr .pv{min-width:48px;text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+.gr .pv.plus{color:var(--ok)} .gr .pv.minus{color:var(--bad)}
+.card-foot{display:flex;justify-content:space-between;gap:12px;padding:14px 28px 20px;background:#f6f8fd;flex-wrap:wrap}
+
+/* ---------- Ende ---------- */
+#end .box{text-align:center}
+.rank{display:grid;gap:10px;margin-top:22px;text-align:left}
+.rk{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.07);border-radius:14px;padding:12px 18px;border-left:8px solid var(--c);font-size:1.25rem}
+.rk .pl{font-size:1.8rem;width:44px;text-align:center}
+.rk .nn{flex:1;font-weight:800}
+.rk .ss{font-weight:900;font-size:1.6rem;color:var(--gold)}
+.rk.first{background:rgba(255,204,51,.18);font-size:1.45rem}
+
+@media (max-width:760px){
+  .card-body.with-graph{grid-template-columns:1fr}
+  #names{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ======================= START ======================= -->
+<section id="setup" class="screen active">
+  <div class="box">
+    <h1 class="logo">PARABEL-JEOPARDY<small>QUADRATISCHE FUNKTIONEN</small></h1>
+
+    <div class="nocalc">🚫🧮 &nbsp;Alle Aufgaben werden <b>ohne Taschenrechner</b> gelöst!</div>
+    <div class="sec">
+      <h3>Gruppen (<span id="gCount"></span>)</h3>
+      <div id="names"></div>
+      <div class="addrow">
+        <button class="btn ghost small" id="addGroup">＋ Gruppe hinzufügen</button>
+        <span class="mini">2 bis 10 Gruppen · ✕ entfernt eine Gruppe</span>
+      </div>
+    </div>
+    <div class="sec">
+      <h3>Quadratische Funktionen mit Parametern spielen?</h3>
+      <div class="seg" id="cat4">
+        <button data-v="param" class="on">Mit Parametern</button>
+        <button data-v="mix">Ohne Parameter</button>
+      </div>
+      <div class="mini" id="cat4Info" style="margin-top:8px"></div>
+    </div>
+    <div class="sec">
+      <h3>Einstellungen</h3>
+      <div class="opts">
+        <label class="opt"><input type="checkbox" id="optMinus" checked> Minuspunkte bei falscher Antwort</label>
+        <label class="opt"><input type="checkbox" id="optDD" checked> Ein verstecktes Feld mit doppelten Punkten</label>
+        <label class="opt">Bedenkzeit pro Frage:
+          <select id="optTimer">
+            <option value="0">ohne Timer</option>
+            <option value="30">30 s</option>
+            <option value="60">60 s</option>
+            <option value="90" selected>90 s</option>
+            <option value="120">2 min</option>
+            <option value="180">3 min</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" id="rulesBtn1">📜 Spielregeln</button>
+      <button class="btn ghost" id="resumeBtn" style="display:none">Letztes Spiel fortsetzen</button>
+      <button class="btn" id="startBtn">Spiel starten ▶</button>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= SPIEL ======================= -->
+<section id="game" class="screen">
+  <header>
+    <div class="title">PARABEL-JEOPARDY</div>
+    <div class="turnBadge">Am Zug: <span class="dot" id="turnDot"></span><b id="turnName"></b></div>
+    <div class="hbtns">
+      <button class="btn ghost small" id="undoBtn" title="Letzte Punktevergabe zurücknehmen">↶ Rückgängig</button>
+      <button class="btn ghost small" id="rulesBtn2">📜 Regeln</button>
+      <button class="btn ghost small" id="restartBtn">Neues Spiel</button>
+      <button class="btn ghost small" id="endBtn">Spiel beenden</button>
+    </div>
+  </header>
+  <div id="board"></div>
+  <div id="scores"></div>
+</section>
+
+<!-- ======================= ENDE ======================= -->
+<section id="end" class="screen">
+  <div class="box">
+    <h1 class="logo">ENDSTAND<small>HERZLICHEN GLÜCKWUNSCH!</small></h1>
+    <div class="rank" id="rank"></div>
+    <div class="actions">
+      <button class="btn ghost" id="backBtn">Zurück zum Spielbrett</button>
+      <button class="btn" id="newBtn">Neues Spiel</button>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= FRAGEKARTE ======================= -->
+<div id="modal" class="overlay hidden">
+  <div class="card" role="dialog" aria-modal="true">
+    <div class="card-head"><span id="mCat"></span><span class="nocalc-badge">🚫 ohne Taschenrechner</span><span class="val" id="mVal"></span></div>
+    <div class="dd hidden" id="mDD">★ DOPPELTE PUNKTE! ★</div>
+    <div class="card-body" id="mBody">
+      <div class="left">
+        <div class="q" id="mQ"></div>
+        <div class="timer" id="timer">
+          <div class="bar"><div id="tBar"></div></div>
+          <span id="tTxt"></span>
+          <button class="btn lite small" id="tBtn">Pause</button>
+        </div>
+        <div><button class="btn blue" id="revealBtn">Lösung zeigen</button></div>
+        <div class="answer hidden" id="mA"></div>
+      </div>
+      <div class="graph" id="mGraph"></div>
+    </div>
+    <div class="score-area">
+      <div class="hint">Punkte vergeben (✓ = richtig, ✗ = falsch) – mehrere Gruppen möglich, z. B. wenn eine andere Gruppe übernimmt:</div>
+      <div id="mGroups"></div>
+    </div>
+    <div class="card-foot">
+      <button class="btn lite" id="cancelBtn">Abbrechen (Feld bleibt offen)</button>
+      <button class="btn" id="doneBtn">Feld abschließen ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= SPIELREGELN ======================= -->
+<div id="rules" class="overlay hidden">
+  <div class="rules-box">
+    <h2>📜 Spielregeln</h2>
+    <ol>
+      <li>Die Gruppen sind <b>reihum</b> an der Reihe. Die Gruppe, die am Zug ist, wünscht sich eine <b>Kategorie</b> und eine <b>Punktzahl</b>.</li>
+      <li><b>Alle Gruppen rechnen mit</b> – nicht nur die Gruppe am Zug! Gerechnet wird <b>ohne Taschenrechner</b>.</li>
+      <li>Die Gruppe am Zug nennt innerhalb der Bedenkzeit ihre Antwort. Ist sie richtig, bekommt sie die Punkte.</li>
+      <li>Ist die Antwort falsch, gibt es <span class="minusRule">Minuspunkte und</span> die Chance für die anderen: Wer sich <b>zuerst meldet</b> und richtig antwortet, <b>springt ein</b> und bekommt die Punkte.</li>
+      <li class="ddRule">Irgendwo ist ein verstecktes Feld mit <b>doppelten Punkten</b> – mit Glück erwischt ihr es!</li>
+      <li>Sind alle Felder gespielt, gewinnt die Gruppe mit den <b>meisten Punkten</b>.</li>
+    </ol>
+    <div class="actions"><button class="btn" id="rulesClose">Alles klar!</button></div>
+  </div>
+</div>
+
+<!-- ======================= BESTÄTIGUNG ======================= -->
+<div id="confirm" class="overlay hidden">
+  <div class="confirm-box">
+    <p>Neues Spiel starten?<br><small>Der aktuelle Spielstand geht verloren.</small></p>
+    <div class="actions">
+      <button class="btn lite" id="confNo">Abbrechen</button>
+      <button class="btn" id="confYes">Ja, neues Spiel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   FRAGEN  –  hier können Fragen leicht angepasst werden.
+   q = Frage (HTML), a = Lösung, w = Lösungsweg,
+   g = optionaler Graph {a, xs, ys} für f(x) = a(x − xs)² + ys
+   ========================================================= */
+const CATS = [
+  { name: "Funktionsterme &amp; Graphen", items: [
+    { q: 'Gib den Scheitelpunkt der Parabel an:<br><span class="m">f(x) = (x + 3)<sup>2</sup> − 5</span>',
+      a: '<span class="m">S(−3 | −5)</span>',
+      w: 'Scheitelpunktform <span class="m">f(x) = a(x − x<sub>S</sub>)<sup>2</sup> + y<sub>S</sub></span>: Aus „x + 3" wird x<sub>S</sub> = −3 (Vorzeichen beachten!), y<sub>S</sub> = −5.' },
+    { q: 'Wie lautet der Funktionsterm der abgebildeten Parabel in <b>Scheitelpunktform</b>?',
+      g: { a: 1, xs: 2, ys: -1 },
+      a: '<span class="m">f(x) = (x − 2)<sup>2</sup> − 1</span>',
+      w: 'Scheitel ablesen: S(2 | −1). Vom Scheitel 1 nach rechts → 1 nach oben, also a = 1 (verschobene Normalparabel).' },
+    { q: 'Wie lautet der Funktionsterm der abgebildeten Parabel in Scheitelpunktform?',
+      g: { a: -0.5, xs: -1, ys: 3 },
+      a: '<span class="m">f(x) = −0,5(x + 1)<sup>2</sup> + 3</span>',
+      w: 'Scheitel S(−1 | 3). Vom Scheitel 1 nach rechts → 0,5 nach unten, also a = −0,5 (nach unten geöffnet, gestaucht).<br>Kontrolle mit dem Gitterpunkt (1 | 1): <span class="m">−0,5 · (1 + 1)<sup>2</sup> + 3 = 1</span> ✓' },
+    { q: 'Eine Parabel hat den Scheitel <span class="m">S(1 | 4)</span> und verläuft durch den Punkt <span class="m">P(3 | −4)</span>.<br>Bestimme ihren Funktionsterm.',
+      a: '<span class="m">f(x) = −2(x − 1)<sup>2</sup> + 4</span>',
+      w: 'Ansatz: <span class="m">f(x) = a(x − 1)<sup>2</sup> + 4</span>.<br>P einsetzen: <span class="m">−4 = a · (3 − 1)<sup>2</sup> + 4</span> ⇒ <span class="m">4a = −8</span> ⇒ <span class="m">a = −2</span>.' },
+    { q: 'Eine Parabel hat die Nullstellen <span class="m">x<sub>1</sub> = −1</span> und <span class="m">x<sub>2</sub> = 5</span> und schneidet die y-Achse bei <span class="m">y = 2,5</span>.<br>Bestimme ihren Funktionsterm in <b>Scheitelpunktform</b>.',
+      a: '<span class="m">f(x) = −0,5(x − 2)<sup>2</sup> + 4,5</span>',
+      w: '1) Ansatz mit Nullstellen: <span class="m">f(x) = a(x + 1)(x − 5)</span><br>2) y-Achsenabschnitt: <span class="m">f(0) = a · 1 · (−5) = 2,5</span> ⇒ <span class="m">a = −0,5</span><br>3) Scheitel liegt genau in der Mitte der Nullstellen: <span class="m">x<sub>S</sub> = (−1 + 5) / 2 = 2</span><br>4) <span class="m">y<sub>S</sub> = f(2) = −0,5 · 3 · (−3) = 4,5</span><br>Kontrolle: <span class="m">f(0) = −0,5 · 4 + 4,5 = 2,5</span> ✓' }
+  ]},
+  { name: "Nullstellen &amp; Gleichungen", items: [
+    { q: 'Bestimme die Nullstellen von<br><span class="m">f(x) = (x − 3)(x + 5)</span>',
+      a: '<span class="m">x<sub>1</sub> = 3; &nbsp;x<sub>2</sub> = −5</span>',
+      w: 'Satz vom Nullprodukt: Ein Produkt ist null, wenn (mindestens) ein Faktor null ist. Keine Rechnung nötig!' },
+    { q: 'Bestimme die Nullstellen von<br><span class="m">f(x) = 2x<sup>2</sup> − 8x</span>',
+      a: '<span class="m">x<sub>1</sub> = 0; &nbsp;x<sub>2</sub> = 4</span>',
+      w: 'x ausklammern: <span class="m">2x(x − 4) = 0</span> ⇒ <span class="m">x = 0</span> oder <span class="m">x = 4</span>. Die Lösungsformel ist hier unnötig.' },
+    { q: 'Löse die Gleichung:<br><span class="m">2x<sup>2</sup> + 2x − 12 = 0</span>',
+      a: '<span class="m">x<sub>1</sub> = 2; &nbsp;x<sub>2</sub> = −3</span>',
+      w: 'Lösungsformel: <span class="m">x = (−2 ± √(4 + 96)) / 4 = (−2 ± 10) / 4</span><br>⇒ <span class="m">x<sub>1</sub> = 2</span>, <span class="m">x<sub>2</sub> = −3</span>. (Oder zuerst durch 2 teilen: <span class="m">x<sup>2</sup> + x − 6 = 0</span>.)' },
+    { q: 'Wie viele Nullstellen hat <span class="m">f(x) = 3x<sup>2</sup> − 6x + 4</span>?<br>Begründe, <b>ohne</b> die Nullstellen auszurechnen.',
+      a: 'Keine Nullstelle.',
+      w: 'Diskriminante: <span class="m">D = b<sup>2</sup> − 4ac = 36 − 48 = −12 &lt; 0</span> ⇒ keine Nullstelle.<br>(Auch möglich: Scheitel S(1 | 1) liegt oberhalb der x-Achse und die Parabel ist nach oben geöffnet.)' },
+    { q: 'Berechne die Schnittpunkte der Parabel <span class="m">p: y = x<sup>2</sup> − 4x + 1</span> mit der Geraden <span class="m">g: y = 2x − 4</span>.',
+      a: '<span class="m">S<sub>1</sub>(1 | −2); &nbsp;S<sub>2</sub>(5 | 6)</span>',
+      w: 'Gleichsetzen: <span class="m">x<sup>2</sup> − 4x + 1 = 2x − 4</span> ⇒ <span class="m">x<sup>2</sup> − 6x + 5 = 0</span> ⇒ <span class="m">x<sub>1</sub> = 1</span>, <span class="m">x<sub>2</sub> = 5</span>.<br>y-Werte (z. B. in g): <span class="m">g(1) = −2</span>, <span class="m">g(5) = 6</span>.' }
+  ]},
+  { name: "Anwendungs&shy;aufgaben", items: [
+    { q: 'Die Flugbahn eines Balls wird beschrieben durch<br><span class="m">h(x) = −0,2(x − 5)<sup>2</sup> + 5</span><br><small>(x: horizontale Entfernung in m, h: Höhe in m)</small><br>Wie hoch fliegt der Ball maximal – und in welcher Entfernung?',
+      a: 'Maximal 5 m hoch, in 5 m Entfernung.',
+      w: 'Der Scheitel <span class="m">S(5 | 5)</span> ist der höchste Punkt der nach unten geöffneten Parabel.' },
+    { q: 'Ein Brückenbogen hat die Form<br><span class="m">b(x) = −0,08x<sup>2</sup> + 8</span> &nbsp;<small>(Angaben in m)</small><br>Wie breit ist der Bogen am Boden?',
+      a: '20 m',
+      w: '<span class="m">−0,08x<sup>2</sup> + 8 = 0</span> ⇒ <span class="m">x<sup>2</sup> = 100</span> ⇒ <span class="m">x = ±10</span>.<br>Breite: <span class="m">10 − (−10) = 20</span> m.' },
+    { q: 'Ein Betrieb hat die Gewinnfunktion<br><span class="m">G(x) = −2x<sup>2</sup> + 80x − 600</span><br><small>(x: Stückzahl, G in €)</small><br>Bei welcher Stückzahl ist der Gewinn maximal und wie hoch ist er?',
+      a: 'Bei 20 Stück; maximaler Gewinn 200 €.',
+      w: 'Scheitel: <span class="m">x<sub>S</sub> = −b/(2a) = −80/(−4) = 20</span>; <span class="m">G(20) = −800 + 1600 − 600 = 200</span>.<br>(Oder: <span class="m">G(x) = −2(x − 20)<sup>2</sup> + 200</span>.)' },
+    { q: 'Die Bahn einer Kugel beim Kugelstoßen:<br><span class="m">h(x) = −0,1x<sup>2</sup> + 0,8x + 2</span> &nbsp;<small>(Angaben in m)</small><br>a) In welcher Höhe wird die Kugel abgestoßen?<br>b) Wie weit fliegt die Kugel?',
+      a: 'a) 2 m &nbsp;&nbsp; b) 10 m',
+      w: 'a) <span class="m">h(0) = 2</span>.<br>b) <span class="m">h(x) = 0</span> | · (−10): <span class="m">x<sup>2</sup> − 8x − 20 = 0</span> ⇒ <span class="m">x = (8 ± √(64 + 80)) / 2 = (8 ± 12) / 2</span><br>⇒ <span class="m">x<sub>1</sub> = −2</span> (entfällt), <span class="m">x<sub>2</sub> = 10</span>.' },
+    { q: 'Ein Tunnel hat die Form <span class="m">t(x) = −0,4x<sup>2</sup> + 3,6</span> &nbsp;<small>(x und t in m, die x-Achse ist die Straße)</small><br>a) Wie breit ist der Tunnel am Boden?<br>b) Ein LKW ist 3 m breit und 3 m hoch. Passt er durch, wenn er genau in der Mitte fährt?',
+      a: 'a) 6 m &nbsp;&nbsp; b) Nein, der LKW passt nicht durch.',
+      w: 'a) <span class="m">−0,4x<sup>2</sup> + 3,6 = 0</span> ⇒ <span class="m">x<sup>2</sup> = 9</span> ⇒ <span class="m">x = ±3</span> ⇒ Breite 6 m.<br>b) Fährt der LKW mittig, liegen seine Kanten bei <span class="m">x = ±1,5</span>: <span class="m">t(1,5) = −0,4 · 2,25 + 3,6 = 2,7</span>.<br>In der Mitte wäre mit 3,6 m genug Platz – an den Kanten ist der Tunnel aber nur 2,7 m hoch ⇒ passt nicht.' }
+  ]},
+  { name: "Quadratische Funktionen mit Parametern", items: [
+    { q: 'Gegeben ist die Schar <span class="m">f<sub>k</sub>(x) = (x − k)<sup>2</sup> + 2</span>.<br>Gib den Scheitelpunkt in Abhängigkeit von k an.',
+      a: '<span class="m">S(k | 2)</span>',
+      w: 'Direkt aus der Scheitelpunktform ablesbar. Je nach k wird die Parabel nur nach links/rechts verschoben – alle Scheitel liegen auf der Geraden <span class="m">y = 2</span>.' },
+    { q: 'Gegeben ist <span class="m">f<sub>k</sub>(x) = x<sup>2</sup> + k</span>.<br>Für welche Werte von k hat der Graph <b>zwei</b>, <b>eine</b> bzw. <b>keine</b> Nullstelle?',
+      a: 'k &lt; 0: zwei &nbsp;|&nbsp; k = 0: eine &nbsp;|&nbsp; k &gt; 0: keine',
+      w: 'Scheitel <span class="m">S(0 | k)</span>, Parabel nach oben geöffnet: Liegt der Scheitel unterhalb der x-Achse, gibt es zwei Schnittpunkte; liegt er darauf, genau einen.' },
+    { q: 'Für welchen Wert von a verläuft der Graph von<br><span class="m">f<sub>a</sub>(x) = a·x<sup>2</sup> + 2x − 1</span><br>durch den Punkt <span class="m">P(2 | 7)</span>?',
+      a: '<span class="m">a = 1</span>',
+      w: 'P einsetzen: <span class="m">7 = a · 4 + 4 − 1</span> ⇒ <span class="m">4a = 4</span> ⇒ <span class="m">a = 1</span>.' },
+    { q: 'Für welche Werte von k hat<br><span class="m">f<sub>k</sub>(x) = x<sup>2</sup> + kx + 4</span><br><b>genau eine</b> Nullstelle?',
+      a: '<span class="m">k = 4</span> oder <span class="m">k = −4</span>',
+      w: 'Genau eine Nullstelle ⇔ Diskriminante null: <span class="m">D = k<sup>2</sup> − 4 · 1 · 4 = k<sup>2</sup> − 16 = 0</span> ⇒ <span class="m">k = ±4</span>.<br>Die Parabel berührt dann die x-Achse in ihrem Scheitel.' },
+    { q: 'Gegeben ist <span class="m">f<sub>k</sub>(x) = x<sup>2</sup> − 2kx + 3</span>.<br>a) Bestimme den Scheitelpunkt in Abhängigkeit von k.<br>b) Für welche k liegt der Scheitel auf der x-Achse?',
+      a: 'a) <span class="m">S(k | 3 − k<sup>2</sup>)</span> &nbsp;&nbsp; b) <span class="m">k = √3</span> oder <span class="m">k = −√3</span> (≈ ±1,73)',
+      w: 'a) Quadratische Ergänzung: <span class="m">x<sup>2</sup> − 2kx + k<sup>2</sup> − k<sup>2</sup> + 3 = (x − k)<sup>2</sup> + 3 − k<sup>2</sup></span>.<br>b) <span class="m">3 − k<sup>2</sup> = 0</span> ⇒ <span class="m">k<sup>2</sup> = 3</span>.' }
+  ]}
+];
+/* Alternative Kategorie, falls Parameter noch nicht unterrichtet wurden */
+const CAT_MIX = { name: "Bunt gemischt", items: [
+  { q: 'Gegeben ist <span class="m">f(x) = −3x<sup>2</sup> + 2x + 1</span>.<br>Ist die Parabel nach oben oder nach unten geöffnet? Ist sie gestreckt oder gestaucht?',
+    a: 'Nach unten geöffnet und gestreckt.',
+    w: 'Entscheidend ist nur a = −3: a &lt; 0 ⇒ nach unten geöffnet; |a| = 3 &gt; 1 ⇒ gestreckt (schmaler als die Normalparabel).' },
+  { q: 'Liegt der Punkt <span class="m">P(−2 | 7)</span> auf dem Graphen von<br><span class="m">f(x) = x<sup>2</sup> − x + 1</span>?',
+    a: 'Ja.',
+    w: 'Punktprobe: <span class="m">f(−2) = (−2)<sup>2</sup> − (−2) + 1 = 4 + 2 + 1 = 7</span> ✓<br>Typischer Fehler: <span class="m">−2<sup>2</sup></span> statt <span class="m">(−2)<sup>2</sup></span> rechnen.' },
+  { q: 'Die Parabel <span class="m">f(x) = (x − 1)<sup>2</sup> − 4</span> hat eine Nullstelle bei <span class="m">x = 3</span>.<br>Gib die zweite Nullstelle an, <b>ohne zu rechnen</b>, und begründe.',
+    a: '<span class="m">x = −1</span>',
+    w: 'Die Parabel ist symmetrisch zur Geraden <span class="m">x = 1</span> durch den Scheitel S(1 | −4).<br>x = 3 liegt 2 Einheiten rechts davon ⇒ die zweite Nullstelle liegt 2 Einheiten links davon: <span class="m">x = −1</span>.' },
+  { q: 'Gib die Wertemenge der Funktion an:<br><span class="m">f(x) = −2(x + 3)<sup>2</sup> + 5</span> &nbsp;<small>(D = ℝ)</small>',
+    a: '<span class="m">W = ]−∞; 5]</span> &nbsp;(also alle y ≤ 5)',
+    w: 'Scheitel S(−3 | 5); die Parabel ist nach unten geöffnet (a = −2 &lt; 0) ⇒ der Scheitel ist der höchste Punkt. Der Wert 5 wird angenommen, alle kleineren Werte auch.' },
+  { q: 'Gib die Wertemenge der Funktion an:<br><span class="m">f(x) = x<sup>2</sup> + 4x + 1</span> &nbsp;<small>(D = ℝ)</small>',
+    a: '<span class="m">W = [−3; ∞[</span> &nbsp;(also alle y ≥ −3)',
+    w: 'Erst in die Scheitelpunktform bringen: <span class="m">x<sup>2</sup> + 4x + 4 − 4 + 1 = (x + 2)<sup>2</sup> − 3</span> ⇒ S(−2 | −3).<br>Die Parabel ist nach oben geöffnet ⇒ der Scheitel ist der tiefste Punkt ⇒ alle y-Werte ab −3.' }
+]};
+let ACTIVE = CATS;   // wird beim Spielstart gesetzt
+const VALUES = [100, 200, 300, 400, 500];
+const COLORS = ['#ff6b6b','#4ecdc4','#ffd93d','#b39dff','#ff9f43','#55efc4','#fd79a8','#74b9ff','#e1b382','#a3e635'];
+const MIN_G = 2, MAX_G = 10;
+const LS_KEY = 'parabel-jeopardy-fos11-v1';
+
+/* ---------- Hilfsfunktionen ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(n);
+function show(id){ document.querySelectorAll('.screen').forEach(e => e.classList.toggle('active', e.id === id)); }
+function save(){ try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch(e){} }
+function load(){ try { return JSON.parse(localStorage.getItem(LS_KEY)); } catch(e){ return null; } }
+function clearSave(){ try { localStorage.removeItem(LS_KEY); } catch(e){} }
+function beep(){
+  try{
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'square'; o.frequency.value = 330; o.connect(g); g.connect(ac.destination);
+    g.gain.setValueAtTime(.15, ac.currentTime); g.gain.exponentialRampToValueAtTime(.001, ac.currentTime + .9);
+    o.start(); o.stop(ac.currentTime + .9);
+  }catch(e){}
+}
+
+/* ---------- Graph (SVG) ---------- */
+function graphSVG({a, xs, ys}){
+  const R = 6, W = 300, u = W / (2*R);
+  const X = x => (x + R) * u, Y = y => (R - y) * u;
+  let s = `<svg viewBox="-14 -14 328 328" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI,Arial,sans-serif">
+    <defs><clipPath id="clp"><rect x="0" y="0" width="${W}" height="${W}"/></clipPath>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1b2340"/></marker></defs>
+    <rect x="0" y="0" width="${W}" height="${W}" fill="#fbfcff" stroke="#d5dbeb"/>`;
+  for (let i = -R; i <= R; i++){
+    s += `<line x1="${X(i)}" y1="0" x2="${X(i)}" y2="${W}" stroke="#dfe4f2" stroke-width="1"/>`;
+    s += `<line x1="0" y1="${Y(i)}" x2="${W}" y2="${Y(i)}" stroke="#dfe4f2" stroke-width="1"/>`;
+  }
+  s += `<line x1="0" y1="${Y(0)}" x2="${W+8}" y2="${Y(0)}" stroke="#1b2340" stroke-width="1.6" marker-end="url(#arr)"/>`;
+  s += `<line x1="${X(0)}" y1="${W}" x2="${X(0)}" y2="-8" stroke="#1b2340" stroke-width="1.6" marker-end="url(#arr)"/>`;
+  for (let i = -R+1; i <= R-1; i++){
+    if (i === 0) continue;
+    s += `<text x="${X(i)}" y="${Y(0)+16}" font-size="13" font-weight="600" text-anchor="middle" fill="#3a4466">${i < 0 ? '−'+(-i) : i}</text>`;
+    s += `<text x="${X(0)-5}" y="${Y(i)+4.5}" font-size="13" font-weight="600" text-anchor="end" fill="#3a4466">${i < 0 ? '−'+(-i) : i}</text>`;
+  }
+  s += `<text x="${W+4}" y="${Y(0)-8}" font-size="18" font-weight="700" font-style="italic" fill="#1b2340" text-anchor="end">x</text>`;
+  s += `<text x="${X(0)+9}" y="4" font-size="18" font-weight="700" font-style="italic" fill="#1b2340">y</text>`;
+  const pts = [];
+  for (let x = -R - .5; x <= R + .5; x += 0.05){
+    const y = a * (x - xs) ** 2 + ys;
+    if (Math.abs(y) < 30) pts.push(`${X(x).toFixed(2)},${Y(y).toFixed(2)}`);
+  }
+  s += `<polyline points="${pts.join(' ')}" fill="none" stroke="#1a3399" stroke-width="3" stroke-linecap="round" clip-path="url(#clp)"/>`;
+  return s + `</svg>`;
+}
+
+/* ---------- Startbildschirm ---------- */
+let S = null;    // Spielstand
+let cur = null;  // aktuelle Frage
+const namesBox = $('#names');
+let groupNames = ['', '', '', ''];   // Start mit 4 Gruppen
+function readNames(){ groupNames = [...namesBox.querySelectorAll('input')].map(i => i.value); }
+function renderNameInputs(){
+  namesBox.innerHTML = '';
+  groupNames.forEach((val, i) => {
+    const w = document.createElement('div'); w.className = 'nm';
+    w.innerHTML = `<span class="dot" style="background:${COLORS[i]}"></span>`;
+    const inp = document.createElement('input');
+    inp.type = 'text'; inp.maxLength = 24; inp.placeholder = `Gruppe ${i+1}`; inp.value = val;
+    const rm = document.createElement('button');
+    rm.className = 'rm'; rm.textContent = '✕'; rm.title = 'Gruppe entfernen';
+    rm.disabled = groupNames.length <= MIN_G;
+    rm.onclick = () => { readNames(); groupNames.splice(i, 1); renderNameInputs(); };
+    w.append(inp, rm); namesBox.appendChild(w);
+  });
+  $('#gCount').textContent = groupNames.length;
+  $('#addGroup').disabled = groupNames.length >= MAX_G;
+}
+$('#addGroup').onclick = () => {
+  readNames();
+  if (groupNames.length < MAX_G){ groupNames.push(''); renderNameInputs(); namesBox.querySelector('.nm:last-child input').focus(); }
+};
+renderNameInputs();
+
+const saved = load();
+if (saved && saved.groups && Object.keys(saved.used).length < 20){
+  const b = $('#resumeBtn'); b.style.display = '';
+  b.textContent = `Letztes Spiel fortsetzen (${saved.groups.map(g => g.name).join(', ')})`;
+  b.onclick = () => { S = saved; startGame(); };
+}
+
+$('#startBtn').onclick = () => {
+  const names = [...namesBox.querySelectorAll('input')].map((i, k) => i.value.trim() || `Gruppe ${k+1}`);
+  const keys = [];
+  for (let c = 0; c < 4; c++) for (let r = 1; r < 5; r++) keys.push(`${c}-${r}`);  // DD nicht bei 100
+  S = {
+    groups: names.map((n, i) => ({ name: n, score: 0, color: COLORS[i] })),
+    used: {}, turn: 0, history: [],
+    minus: $('#optMinus').checked,
+    timer: +$('#optTimer').value,
+    dd: $('#optDD').checked ? keys[Math.floor(Math.random() * keys.length)] : null,
+    cat4: cat4Choice
+  };
+  save(); startGame();
+};
+
+/* Umschalter 4. Kategorie */
+let cat4Choice = 'param';
+function setCat4(v){
+  cat4Choice = v;
+  $('#cat4Info').textContent = v === 'mix'
+    ? 'Die Kategorie „Parameter“ wird durch „Bunt gemischt“ ersetzt (u. a. Symmetrie und Wertemenge).'
+    : 'Kategorien: Funktionsterme & Graphen · Nullstellen & Gleichungen · Anwendungsaufgaben · Quadratische Funktionen mit Parametern';
+  document.querySelectorAll('#cat4 button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+}
+document.querySelectorAll('#cat4 button').forEach(b => b.onclick = () => setCat4(b.dataset.v));
+setCat4('param');
+
+/* Spielregeln */
+function showRules(){
+  const minus = S ? S.minus : $('#optMinus').checked;
+  $('.minusRule').style.display = minus ? '' : 'none';
+  const dd = S ? !!S.dd : $('#optDD').checked;
+  $('.ddRule').style.display = dd ? '' : 'none';
+  $('#rules').classList.remove('hidden');
+}
+$('#rulesBtn1').onclick = showRules;
+$('#rulesBtn2').onclick = showRules;
+$('#rulesClose').onclick = () => $('#rules').classList.add('hidden');
+$('#rules').onclick = e => { if (e.target.id === 'rules') $('#rules').classList.add('hidden'); };
+
+/* ---------- Spielbrett ---------- */
+function startGame(){
+  ACTIVE = S.cat4 === 'mix' ? [...CATS.slice(0, 3), CAT_MIX] : CATS;
+  show('game'); renderBoard(); renderScores();
+}
+
+function renderBoard(){
+  const b = $('#board'); b.innerHTML = '';
+  ACTIVE.forEach(c => b.insertAdjacentHTML('beforeend', `<div class="cat">${c.name}</div>`));
+  for (let r = 0; r < 5; r++){
+    for (let c = 0; c < 4; c++){
+      const key = `${c}-${r}`, u = S.used[key];
+      const el = document.createElement('button');
+      el.className = 'tile' + (u ? ' used' : '');
+      if (u){
+        el.disabled = true;
+        const g = u.who != null ? S.groups[u.who] : null;
+        el.innerHTML = g ? `<span class="who" style="--c:${g.color}">✓ ${esc(g.name)}</span><span class="pts">${u.val}</span>`
+                         : `<span class="who">–</span><span class="pts">${u.val}</span>`;
+      } else {
+        el.textContent = VALUES[r];
+        el.onclick = () => openTile(c, r);
+      }
+      b.appendChild(el);
+    }
+  }
+  const t = S.groups[S.turn];
+  $('#turnName').textContent = t.name; $('#turnDot').style.background = t.color;
+  $('#undoBtn').disabled = S.history.length === 0;
+}
+
+function renderScores(){
+  const box = $('#scores'); box.innerHTML = '';
+  S.groups.forEach((g, i) => {
+    const d = document.createElement('div');
+    d.className = 'sc' + (i === S.turn ? ' turn' : '');
+    d.style.setProperty('--c', g.color);
+    d.innerHTML = `<div class="n" title="Klicken: diese Gruppe ist am Zug">${esc(g.name)}</div>
+      <div class="p ${g.score < 0 ? 'neg' : ''}">${g.score}</div>
+      <div class="adj"><button data-d="-100" title="Korrektur">−100</button><button data-d="100" title="Korrektur">+100</button></div>`;
+    d.querySelector('.n').onclick = () => { S.turn = i; save(); renderBoard(); renderScores(); };
+    d.querySelectorAll('.adj button').forEach(btn => btn.onclick = () => {
+      const delta = +btn.dataset.d;
+      g.score += delta;
+      S.history.push({ type: 'manual', idx: i, delta, prevTurn: S.turn });
+      save(); renderScores(); renderBoard();
+    });
+    box.appendChild(d);
+  });
+}
+
+/* ---------- Fragekarte ---------- */
+let tInt = null, tLeft = 0, tRun = false;
+function openTile(c, r){
+  const key = `${c}-${r}`, it = ACTIVE[c].items[r], dd = S.dd === key;
+  cur = { c, r, key, val: VALUES[r] * (dd ? 2 : 1), res: {} };
+  $("#mCat").innerHTML = ACTIVE[c].name;
+  $('#mVal').textContent = cur.val + ' Punkte';
+  $('#mDD').classList.toggle('hidden', !dd);
+  $('#mQ').innerHTML = it.q;
+  $('#mA').innerHTML = it.a + (it.w ? `<div class="way">${it.w}</div>` : '');
+  $('#mA').classList.add('hidden');
+  $('#revealBtn').style.display = '';
+  $('#mGraph').innerHTML = it.g ? graphSVG(it.g) : '';
+  $('#mBody').classList.toggle('with-graph', !!it.g);
+  renderModalGroups();
+  $('#modal').classList.remove('hidden');
+  $('.card').scrollTop = 0;
+  startTimer();
+}
+
+function renderModalGroups(){
+  const box = $('#mGroups'); box.innerHTML = '';
+  S.groups.forEach((g, i) => {
+    const st = cur.res[i] || 0;
+    const pts = st === 1 ? cur.val : (st === -1 && S.minus ? -cur.val : 0);
+    const d = document.createElement('div');
+    d.className = 'gr'; d.style.setProperty('--c', g.color);
+    d.innerHTML = `<span class="gn">${esc(g.name)}</span>
+      <button class="r ${st===1?'on':''}" title="richtig">✓</button>
+      <button class="f ${st===-1?'on':''}" title="falsch">✗</button>
+      <span class="pv ${pts>0?'plus':pts<0?'minus':''}">${st ? fmt(pts) : ''}</span>`;
+    d.querySelector('.r').onclick = () => { cur.res[i] = st === 1 ? 0 : 1; renderModalGroups(); };
+    d.querySelector('.f').onclick = () => { cur.res[i] = st === -1 ? 0 : -1; renderModalGroups(); };
+    box.appendChild(d);
+  });
+}
+
+function startTimer(){
+  clearInterval(tInt);
+  const T = S.timer;
+  $('#timer').classList.toggle('hidden', !T);
+  if (!T) return;
+  tLeft = T; tRun = true;
+  $('#tBtn').textContent = 'Pause';
+  $('#tBar').className = '';
+  updTimer();
+  tInt = setInterval(() => {
+    if (!tRun) return;
+    tLeft = Math.max(0, tLeft - 0.25);
+    updTimer();
+    if (tLeft <= 0){ clearInterval(tInt); tRun = false; beep(); }
+  }, 250);
+}
+function updTimer(){
+  const T = S.timer, p = tLeft / T * 100;
+  $('#tBar').style.width = (tLeft <= 0 ? 100 : p) + '%';
+  $('#tBar').className = tLeft <= 0 ? 'over' : (p < 25 ? 'warn' : '');
+  $('#tTxt').textContent = tLeft <= 0 ? 'Zeit ist um!' : Math.ceil(tLeft) + ' s';
+  $('#tBtn').style.display = tLeft <= 0 ? 'none' : '';
+}
+function stopTimer(){ clearInterval(tInt); tRun = false; }
+$('#tBtn').onclick = () => { tRun = !tRun; $('#tBtn').textContent = tRun ? 'Pause' : 'Weiter'; };
+
+$('#revealBtn').onclick = () => {
+  stopTimer(); $('#tBtn').style.display = 'none';
+  $('#mA').classList.remove('hidden');
+  $('#revealBtn').style.display = 'none';
+};
+
+function closeModal(){ stopTimer(); $('#modal').classList.add('hidden'); cur = null; }
+$('#cancelBtn').onclick = closeModal;
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && cur) closeModal(); });
+
+$('#doneBtn').onclick = () => {
+  const deltas = {};
+  let who = null;
+  Object.entries(cur.res).forEach(([i, st]) => {
+    if (!st) return;
+    const d = st === 1 ? cur.val : (S.minus ? -cur.val : 0);
+    if (st === 1 && who === null) who = +i;
+    if (d){ deltas[i] = d; S.groups[i].score += d; }
+  });
+  S.used[cur.key] = { who, val: cur.val };
+  S.history.push({ type: 'tile', key: cur.key, deltas, prevTurn: S.turn });
+  S.turn = (S.turn + 1) % S.groups.length;
+  save(); closeModal(); renderBoard(); renderScores();
+  if (Object.keys(S.used).length === 20) setTimeout(showEnd, 400);
+};
+
+/* ---------- Rückgängig / Ende ---------- */
+$('#undoBtn').onclick = () => {
+  const h = S.history.pop(); if (!h) return;
+  if (h.type === 'tile'){
+    Object.entries(h.deltas).forEach(([i, d]) => S.groups[i].score -= d);
+    delete S.used[h.key];
+  } else {
+    S.groups[h.idx].score -= h.delta;
+  }
+  S.turn = h.prevTurn;
+  save(); renderBoard(); renderScores();
+};
+
+function showEnd(){
+  const sorted = S.groups.map(g => g).sort((a, b) => b.score - a.score);
+  const medals = ['🥇','🥈','🥉'];
+  let place = 0, prev = null;
+  $('#rank').innerHTML = sorted.map((g, k) => {
+    if (g.score !== prev){ place = k; prev = g.score; }
+    return `<div class="rk ${place===0?'first':''}" style="--c:${g.color}">
+      <span class="pl">${medals[place] || (place + 1) + '.'}</span>
+      <span class="nn">${esc(g.name)}</span><span class="ss">${g.score}</span></div>`;
+  }).join('');
+  show('end');
+}
+$('#endBtn').onclick = showEnd;
+$('#backBtn').onclick = () => show('game');
+/* Eigenes Bestätigungsfenster (browserseitige confirm()-Dialoge sind teils blockiert) */
+function askRestart(){ $('#confirm').classList.remove('hidden'); }
+$('#newBtn').onclick = askRestart;
+$('#restartBtn').onclick = askRestart;
+$('#confNo').onclick = () => $('#confirm').classList.add('hidden');
+$('#confYes').onclick = () => {
+  $('#confirm').classList.add('hidden');
+  clearSave();
+  if (S) { groupNames = S.groups.map(g => /^Gruppe \d+$/.test(g.name) ? '' : g.name); renderNameInputs(); setCat4(S.cat4 || 'param'); }  // Namen bleiben erhalten
+  S = null; $('#resumeBtn').style.display = 'none'; show('setup');
+};
+</script>
+</body>
+</html>
