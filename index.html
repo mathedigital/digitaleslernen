@@ -79,7 +79,7 @@
   .chip:focus-visible, .karte:focus-visible { outline: 3px solid var(--m11); outline-offset: 2px; }
 
   /* Kurse */
-  main { padding: 8px 0 40px; }
+  main.wrap { padding: 8px 16px 40px; }
   .kurs { margin-top: 32px; }
   .kurs-kopf { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
   .kurs-symbol {
@@ -112,6 +112,7 @@
     background: color-mix(in srgb, var(--akzent) 13%, transparent); color: var(--akzent);
   }
   .marke.neu { background: #f59e0b; color: #1b1300; }
+  .marke.spiel { background: #e11d74; color: #fff; }
   .oeffnen { color: var(--akzent); font-size: .9rem; font-weight: 600; white-space: nowrap; }
 
   .leer {
@@ -164,7 +165,7 @@
      datei : Dateiname genau wie auf GitHub (Groß-/Kleinschreibung beachten!)
      titel : Anzeigename
      lb    : Nummer des Lernbereichs
-     art   : "Zusammenfassung", "Übung" oder "Selbstlernen"
+     art   : "Zusammenfassung", "Übung", "Selbstlernen" oder "Spiel"
      text  : kurze Beschreibung (ein Satz)
      neu   : true  -> zeigt die Marke "Neu" (optional, später wieder löschen)
 
@@ -183,7 +184,9 @@ const KURSE = [
       { datei: "LB1_Lineare_Funktionen_Zusammenfassung.html", titel: "Lineare Funktionen", lb: 1, art: "Zusammenfassung",
         text: "Funktionsbegriff, Funktionsterm ablesen, Nullstellen, parallele und senkrechte Geraden, Anwendungen." },
       { datei: "LB1_Quadratische_Funktionen_Grundlagen_SOL.html", titel: "Quadratische Funktionen – Grundlagen", lb: 1, art: "Selbstlernen",
-        text: "Parabeln, Scheitelpunktform und Verschiebungen selbstständig erarbeiten." }
+        text: "Parabeln, Scheitelpunktform und Verschiebungen selbstständig erarbeiten." },
+      { datei: "LB1_jeopardy_spiel_parabeln.html", titel: "Jeopardy: Parabeln", lb: 1, art: "Spiel", neu: false,
+        text: "Quizspiel zu Parabeln und quadratischen Funktionen – Kategorien wählen und Punkte sammeln." }
     ]
   },
   {
@@ -241,7 +244,7 @@ function karte(m, k) {
       <span class="karte-titel">${esc(m.titel)}</span>
       <p class="karte-text">${esc(m.text)}</p>
       <span class="karte-fuss">
-        <span class="marken">${m.neu ? `<span class="marke neu">Neu</span>` : ""}<span class="marke">${esc(m.art)}</span></span>
+        <span class="marken">${m.neu ? `<span class="marke neu">Neu</span>` : ""}<span class="marke${m.art === "Spiel" ? " spiel" : ""}">${m.art === "Spiel" ? "🎲 " : ""}${esc(m.art)}</span></span>
         <span class="oeffnen" aria-hidden="true">Öffnen →</span>
       </span>
     </a>`;
